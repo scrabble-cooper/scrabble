@@ -1,3 +1,5 @@
+CREATE SEQUENCE game_seq start with 1;
+
 CREATE TABLE games (
   game_id bigint NOT NULL DEFAULT nextval('game_seq'),
 	p1_id bigint NOT NULL,
@@ -10,23 +12,24 @@ CREATE TABLE games (
 	letters_left varchar(100) DEFAULT
 	 'AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ',
 	winner int DEFAULT 0,
-	board text[15][15] /*DEFAULT: "{0,0,0}" 
-	{   {'TW',,,'DL',,,,'TW',,,,'DL',,,'TW',}
-        {,'DW',,,,'TL',,,,'TL',,,,'DW',,}
-        {,,'DW',,,,'DL',,'DL',,,,'DW',,,}
-        {'DL',,,'DW',,,,'DL',,,,'DW',,,'DL',}
-        {,,,,'DW',,,,,,'DW',,,,,}
-        {,'TL',,,,'TL',,,,'TL',,,,'TL',,}
-        {,,'DL',,,,'DL',,'DL',,,,'DL',,,}
-        {'TW',,,'DL',,,,'DW',,,,'DL',,,'TW',}
-        {,,'DL',,,,'DL',,'DL',,,,'DL',,,}
-        {,'TL',,,,'TL',,,,'TL',,,,'TL',,}
-        {,,,,'DW',,,,,,'DW',,,,,}
-        {'DL',,,'DW',,,,'DL',,,,'DW',,,'DL',}
-        {,,'DW',,,,'DL',,'DL',,,,'DW',,,}
-        {,'DW',,,,'TL',,,,'TL',,,,'DW',,}
-         {'TW',,,'DL',,,,'TW',,,,'DL',,,'TW'}
-	}"*/, 
+	board json DEFAULT CAST('{'
+      '{TW,NM,NM,DL,NM,NM,NM,TW,NM,NM,NM,DL,NM,NM,TW},'
+      '{NM,DW,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,DW,NM},'
+      '{NM,NM,DW,NM,NM,NM,DL,NM,DL,NM,NM,NM,DW,NM,NM},'
+      '{DL,NM,NM,DW,NM,NM,NM,DL,NM,NM,NM,DW,NM,NM,DL},'
+      '{NM,NM,NM,NM,DW,NM,NM,NM,NM,NM,DW,NM,NM,NM,NM},'
+      '{NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM},'
+      '{NM,NM,DL,NM,NM,NM,DL,NM,DL,NM,NM,NM,DL,NM,NM},'
+      '{TW,NM,NM,DL,NM,NM,NM,DW,NM,NM,NM,DL,NM,NM,TW},'
+      '{NM,NM,DL,NM,NM,NM,DL,NM,DL,NM,NM,NM,DL,NM,NM},'
+      '{NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM},'
+      '{NM,NM,NM,NM,DW,NM,NM,NM,NM,NM,DW,NM,NM,NM,NM},'
+      '{DL,NM,NM,DW,NM,NM,NM,DL,NM,NM,NM,DW,NM,NM,DL},'
+      '{NM,NM,DW,NM,NM,NM,DL,NM,DL,NM,NM,NM,DW,NM,NM},'
+      '{NM,DW,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,DW,NM},'
+      '{TW,NM,NM,DL,NM,NM,NM,TW,NM,NM,NM,DL,NM,NM,TW}'
+	'}' AS JSON), -- '{}' is json, [] is array; use json_build_array(<json type>) to extract array
+
 	PRIMARY KEY (game_id),
 	FOREIGN KEY (p1_id) REFERENCES users(user_id) ON DELETE CASCADE,
 	FOREIGN KEY (p2_id) REFERENCES users(user_id) ON DELETE CASCADE,
@@ -39,3 +42,23 @@ CREATE TABLE games (
 	  3 : tie
   */
 );
+
+/*
+SELECT json_build_array('{'
+    '{ TW,NM,NM,DL,NM,NM,NM,TW,NM,NM,NM,DL,NM,NM,TW},'
+    '{ NM,DW,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,DW,NM},'
+    '{ NM,NM,DW,NM,NM,NM,DL,NM,DL,NM,NM,NM,DW,NM,NM},'
+    '{ DL,NM,NM,DW,NM,NM,NM,DL,NM,NM,NM,DW,NM,NM,DL},'
+    '{ NM,NM,NM,NM,DW,NM,NM,NM,NM,NM,DW,NM,NM,NM,NM},'
+    '{ NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM},'
+    '{ NM,NM,DL,NM,NM,NM,DL,NM,DL,NM,NM,NM,DL,NM,NM},'
+    '{ TW,NM,NM,DL,NM,NM,NM,DW,NM,NM,NM,DL,NM,NM,TW},'
+    '{ NM,NM,DL,NM,NM,NM,DL,NM,DL,NM,NM,NM,DL,NM,NM},'
+    '{ NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,TL,NM},'
+    '{ NM,NM,NM,NM,DW,NM,NM,NM,NM,NM,DW,NM,NM,NM,NM},'
+    '{ DL,NM,NM,DW,NM,NM,NM,DL,NM,NM,NM,DW,NM,NM,DL},'
+    '{ NM,NM,DW,NM,NM,NM,DL,NM,DL,NM,NM,NM,DW,NM,NM},'
+    '{ NM,DW,NM,NM,NM,TL,NM,NM,NM,TL,NM,NM,NM,DW,NM},'
+    '{ TW,NM,NM,DL,NM,NM,NM,TW,NM,NM,NM,DL,NM,NM,TW} }');
+    --::text[]); -- alternative form of casting, not needed here though
+*/
