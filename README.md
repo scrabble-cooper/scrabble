@@ -17,5 +17,5 @@ docker run --rm --name lil-postgres -e POSTGRES_PASSWORD=password -d -v $HOME/sr
 
 ```
 psql -h localhost -U postgres -d scrabble -f users.sql
-psql -h localhost -U postgres -d scrabble -f testUsers.sql
+psql -h localhost -U postgres -d scrabble -f test_users.sql
 ```
