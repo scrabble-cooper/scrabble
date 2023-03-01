@@ -14,7 +14,8 @@ public class Game implements DataTransferObject {
     public long getPlayerId() {
         return playerId;
     }
-
+    
+    //might not need this, since its already in Player.java
     public void setPlayerId(long playerId) {
         this.playerId = playerId;
     }

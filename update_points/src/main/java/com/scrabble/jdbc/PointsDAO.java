@@ -30,10 +30,3 @@ public class PointsDAO extends DataAccessObject{
         return game;
     }
 }
-
- 
-
-if (player hand not full){
-    replace = 7 - hand 
-
-}
