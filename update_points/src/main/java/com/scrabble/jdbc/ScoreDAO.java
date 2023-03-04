@@ -18,31 +18,31 @@ public class ScoreDAO extends DataAccessObject{
     }
 
     // @Override
-    public updateP1Score(Game thisgame) {
+    public Game updateP1Score(Game thisgame) {
         try(PreparedStatement statement = this.connection.prepareStatement(GET_P1_SCORE);) {
             // statement.setLong(1, id);
             ResultSet rs = statement.executeQuery();
             while(rs.next()) {
-                thisgame.setP1Points(rs.getInt("p1_score"));
+                thisgame.setP1Score(rs.getInt("p1_score"));
             } 
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return game;
+        return thisgame;
     }
 
-    public updateP2Score(Game thisgame) {
+    public Game updateP2Score(Game thisgame) {
         try(PreparedStatement statement = this.connection.prepareStatement(GET_P2_SCORE);) {
             // statement.setLong(1, id);
             ResultSet rs = statement.executeQuery();
             while(rs.next()) {
-                thisgame.setP1Points(rs.getInt("p2_score"));
+                thisgame.setP2Score(rs.getInt("p2_score"));
             } 
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return game;
+        return thisgame;
     }
 }

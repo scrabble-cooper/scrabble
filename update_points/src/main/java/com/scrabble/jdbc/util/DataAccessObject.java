@@ -14,6 +14,8 @@ public abstract class DataAccessObject  {
         this.connection = connection;
     }
 
-    public abstract T findById(long id);
+//    public abstract T findById(long id);
+//    public abstract T updateP1Score(T thisgame);
+
 }
 

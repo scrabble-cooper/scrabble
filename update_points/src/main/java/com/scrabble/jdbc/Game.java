@@ -3,6 +3,7 @@ import com.scrabble.jdbc.util.DataTransferObject;
 
 public class Game implements DataTransferObject {
 
+    private long gameId;
     private long p1ID;
     private long p2ID;
     private int p1Score;

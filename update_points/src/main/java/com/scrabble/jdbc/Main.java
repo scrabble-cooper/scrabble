@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Hello Learning JDBC");
         DatabaseConnectionManager dcm = new DatabaseConnectionManager("localhost",
-                "tictactoe", "postgres", "password");
+                "scrabble", "postgres", "password");
 
         try {
             Connection connection = dcm.getConnection();
@@ -28,8 +28,8 @@ public class Main {
             player.setUserName("Star");
             player.setPassword("password");
 
-            player = playerDAO.create(player);
-            System.out.println(player.getPlayerId() + " " + player.getUserName() + " " + player.getPassword());
+//            player = playerDAO.create(player);
+//            System.out.println(player.getPlayerId() + " " + player.getUserName() + " " + player.getPassword());
         }
         catch(SQLException e) {
             e.printStackTrace();
