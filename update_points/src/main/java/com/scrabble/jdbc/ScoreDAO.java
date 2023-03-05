@@ -8,41 +8,43 @@ import java.sql.SQLException;
 
 public class ScoreDAO extends DataAccessObject{
 
-    private static final String GET_P1_SCORE = "SELECT p1_score " +
-         "FROM games WHERE p1_id=?";
-    private static final String GET_P2_SCORE = "SELECT p2_score " +
-         "FROM games WHERE p2_id=?";
+    private static final String GET_P1_SCORE = "UPDATE games SET p1_score=? " +
+            "WHERE p1_id=? AND game_id=?";
+    private static final String GET_P2_SCORE = "UPDATE games SET p2_score=? " +
+            "WHERE p2_id=? AND game_id=?";
 
     public ScoreDAO(Connection connection) {
         super(connection);
     }
 
-    // @Override
-    public Game updateP1Score(Game thisgame) {
-        try(PreparedStatement statement = this.connection.prepareStatement(GET_P1_SCORE);) {
-            // statement.setLong(1, id);
-            ResultSet rs = statement.executeQuery();
-            while(rs.next()) {
-                thisgame.setP1Score(rs.getInt("p1_score"));
-            } 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        return thisgame;
+    @Override
+    public Game findById(long id){
+        Game game = new Game();
+        return game;
     }
 
-    public Game updateP2Score(Game thisgame) {
-        try(PreparedStatement statement = this.connection.prepareStatement(GET_P2_SCORE);) {
-            // statement.setLong(1, id);
-            ResultSet rs = statement.executeQuery();
-            while(rs.next()) {
-                thisgame.setP2Score(rs.getInt("p2_score"));
-            } 
+    // @Override
+    public void updateP1Score(long gameID, long p1ID, int score) {
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_P1_SCORE);) {
+            statement.setLong(1, score);
+            statement.setLong(2, p1ID);
+            statement.setLong(3, gameID);
+            statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        return thisgame;
+    }
+
+    public void updateP2Score(long gameID, long p2ID, int score) {
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_P2_SCORE);) {
+            statement.setLong(1, score);
+            statement.setLong(2, p2ID);
+            statement.setLong(3, gameID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 }

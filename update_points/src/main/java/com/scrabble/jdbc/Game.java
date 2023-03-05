@@ -1,6 +1,6 @@
 package com.scrabble.jdbc;
 import com.scrabble.jdbc.util.DataTransferObject;
-
+import java.sql.Array;
 public class Game implements DataTransferObject {
 
     private long gameId;
@@ -8,23 +8,31 @@ public class Game implements DataTransferObject {
     private long p2ID;
     private int p1Score;
     private int p2Score;
+    private String letterBag;
+    private int currentRound;
+    private String p1Hand;
+    private String p2Hand;
+    private int winner;
+    private Array board;
 
-    public long getId() {
+    public long getGameId() {
         return gameId;
     }
 
     public long getP1Id() {
         return p1ID;
     }
-    
+
+    public void setP1ID(long p1ID) {
+        this.p1ID = p1ID;
+    }
     public long getP2Id() {
         return p2ID;
     }
 
-    //might not need this, since its already in Player.java
-    // public void setPlayerId(long playerId) {
-    //     this.playerId = playerId;
-    // }
+    public void setP2ID(long p2ID) {
+        this.p2ID = p2ID;
+    }
 
     public int getP1Score() {
         return p1Score;
@@ -41,4 +49,53 @@ public class Game implements DataTransferObject {
     public void setP2Score(int p2Score) {
         this.p2Score = p2Score;
     }
+
+    public String getLetterBag() {
+        return letterBag;
+    }
+
+    public void setLetterBag(String letterBag) {
+        this.letterBag = letterBag;
+    }
+
+    public int getCurrentRound() {
+        return currentRound;
+    }
+
+    public void setCurrentRound(int currentRound) {
+        this.currentRound = currentRound;
+    }
+
+    public String getP1Hand() {
+        return p1Hand;
+    }
+
+    public void setP1Hand(String p1Hand) {
+        this.p1Hand = p1Hand;
+    }
+
+    public String getP2Hand() {
+        return p2Hand;
+    }
+
+    public void setP2Hand(String p2Hand) {
+        this.p2Hand = p2Hand;
+    }
+
+    public int getWinner() {
+        return winner;
+    }
+
+    public void setWinner(int winner) {
+        this.winner = winner;
+    }
+
+    public Array getBoard() {
+        return board;
+    }
+
+    public void setBoard(Array board) {
+        this.board = board;
+    }
+
 }
