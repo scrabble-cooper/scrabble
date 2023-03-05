@@ -10,23 +10,16 @@ public class Main {
                 "scrabble", "postgres", "password");
 
         try {
-            int p1Score = 0;
             Connection connection = dcm.getConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT p1_score FROM games WHERE game_id=12");
-            while(resultSet.next()){
-                p1Score = resultSet.getInt(1);
-                System.out.println(p1Score);
-            }
 
             PlayerDAO playerDAO = new PlayerDAO(connection);
             Player player = playerDAO.findById(1);
             System.out.println(player.getPlayerId() + " " + player.getUserName() + " " + player.getPassword());
 
             ScoreDAO scoreDAO = new ScoreDAO(connection);
-            int score = 5;
-            p1Score += score;
-            scoreDAO.updateP1Score(12, 2, p1Score);
+            int points = 5;
+            scoreDAO.updateP1Score(12, points); // Adds on 5 points to p1_score in games table
+            scoreDAO.updateP2Score(12, points); // Adds on 5 points to p2_score in games table
         }
         catch(SQLException e) {
             e.printStackTrace();
