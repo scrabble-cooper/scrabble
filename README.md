@@ -13,6 +13,7 @@ Inside postgres, ```\c scrabble``` to connect to database scrabble
 Starting local postgres:
 ```
 docker run --rm --name lil-postgres -e POSTGRES_PASSWORD=password -d -v $HOME/srv/postgres:/var/lib/postgresql/data -p 5432:5432 postgres
+\\ used to use below command for md5 but no longer using
 docker run -e POSTGRES_HOST_AUTH_METHOD=md5 -e POSTGRES_PASSWORD=password -p 5432:5432 --name lil-postgres -d postgres
 ```
 
