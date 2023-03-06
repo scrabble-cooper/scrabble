@@ -6,8 +6,12 @@ import java.sql.*;
 
 public class GameDAO extends DataAccessObject {
     private static final String GET_GAME= "SELECT * FROM games WHERE game_id=?";
-//    private static final String UPDATE_GAME = "UPDATE games SET board = ?::TEXT[][] WHERE game_id=?"; //no cast needed
+    //    private static final String UPDATE_GAME = "UPDATE games SET board = ?::TEXT[][] WHERE game_id=?"; //no cast needed
     private static final String UPDATE_GAME = "UPDATE games SET board = ? WHERE game_id=?";
+    private static final String GET_P1_SCORE = "SELECT p1_score FROM games WHERE game_id=?";
+    private static final String GET_P2_SCORE = "SELECT p2_score FROM games WHERE game_id=?";
+    private static final String UPDATE_P1_SCORE = "UPDATE games SET p1_score=? WHERE game_id=?";
+    private static final String UPDATE_P2_SCORE = "UPDATE games SET p2_score=? WHERE game_id=?";
 
     public GameDAO(Connection connection) {
         super(connection);
@@ -43,6 +47,56 @@ public class GameDAO extends DataAccessObject {
             statement.setArray(1,updatedBoard);
             statement.setLong(2, gameId);
 //            System.out.println(statement); // print statement will show =? for board param, but works regardless
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateP1Score(long gameID, int points) {
+        // Gets p1_score from table games
+        int updated_score = 0;
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_P1_SCORE);) {
+            statement.setLong(1, gameID);
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()){
+                updated_score = rs.getInt(1) + points;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        // Updates p1_score in table games
+        try(PreparedStatement statement2 = this.connection.prepareStatement(UPDATE_P1_SCORE);) {
+            statement2.setLong(1, updated_score);
+            statement2.setLong(2, gameID);
+            statement2.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateP2Score(long gameID, int points) {
+        // Gets p2_score from table games
+        int updated_score = 0;
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_P2_SCORE);) {
+            statement.setLong(1, gameID);
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()){
+                updated_score = rs.getInt(1) + points;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        // Updates p2_score in table games
+        try(PreparedStatement statement = this.connection.prepareStatement(UPDATE_P2_SCORE);) {
+            statement.setInt(1, updated_score);
+            statement.setLong(2, gameID);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
