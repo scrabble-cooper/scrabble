@@ -1,5 +1,5 @@
 package com.scrabblecooper.scrabble;
-import com.scrabble.jdbc.util.DataTransferObject;
+import com.scrabblecooper.scrabble.util.DataTransferObject;
 
 import java.sql.Array;
 

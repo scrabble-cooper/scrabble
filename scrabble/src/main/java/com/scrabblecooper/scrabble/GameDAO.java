@@ -1,5 +1,5 @@
 package com.scrabblecooper.scrabble;
-import com.scrabble.jdbc.util.DataAccessObject;
+import com.scrabblecooper.scrabble.util.DataAccessObject;
 
 import java.sql.*;
 
