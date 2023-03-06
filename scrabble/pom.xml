@@ -49,7 +49,7 @@
 						<configuration>
 							<classifier>spring-boot</classifier>
 							<mainClass>
-								com.scrabblecooper.scrabble.scrabbleApplication
+								com.scrabblecooper.scrabble.ScrabbleApplication
 							</mainClass>
 						</configuration>
 					</execution>
