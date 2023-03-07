@@ -16,6 +16,8 @@ public class GameDAO extends DataAccessObject {
     private static final String GET_P2_HAND = "SELECT p2_hand FROM games WHERE game_id=?";
     private static final String UPDATE_P1_HAND = "UPDATE games SET p1_hand=? WHERE game_id=?";
     private static final String UPDATE_P2_HAND = "UPDATE games SET p2_hand=? WHERE game_id=?";
+    private static final String GET_LETTERBAG = "SELECT letters_left FROM games WHERE game_id=?";
+    private static final String UPDATE_LETTERBAG = "UPDATE games SET letters_left=? WHERE game_id=?";
 
     public GameDAO(Connection connection) {
         super(connection);
@@ -100,6 +102,56 @@ public class GameDAO extends DataAccessObject {
         // Sets updated p2_score in table games
         try (PreparedStatement statement = this.connection.prepareStatement(UPDATE_P2_SCORE);) {
             statement.setInt(1, updated_score);
+            statement.setLong(2, gameID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void removeFromLetterBag(long gameID, String letter) {
+        // Gets letter bag from table games
+        String updated_letterbag = "";
+        try (PreparedStatement statement = this.connection.prepareStatement(GET_LETTERBAG);) {
+            statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                updated_letterbag = rs.getString(1).replaceFirst(letter.toUpperCase(), "");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        // Sets updated letter bag in table games
+        try (PreparedStatement statement = this.connection.prepareStatement(UPDATE_LETTERBAG);) {
+            statement.setString(1, updated_letterbag);
+            statement.setLong(2, gameID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void addToLetterBag(long gameID, String letter) {
+        // Gets letter bag from table games
+        String updated_letter_bag = "";
+        try (PreparedStatement statement = this.connection.prepareStatement(GET_LETTERBAG);) {
+            statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                updated_letterbag = rs.getString(1) + letter.toUpperCase();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        // Sets updated letter bag in table games
+        try (PreparedStatement statement = this.connection.prepareStatement(UPDATE_LETTERBAG);) {
+            statement.setString(1, updated_letterbag);
             statement.setLong(2, gameID);
             statement.executeUpdate();
         } catch (SQLException e) {

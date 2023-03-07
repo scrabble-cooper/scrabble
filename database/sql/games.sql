@@ -4,13 +4,19 @@ CREATE TABLE games (
   game_id bigint NOT NULL DEFAULT nextval('game_seq'),
 	p1_id bigint NOT NULL,
 	p2_id bigint NOT NULL,
+
+  players_turn_id bigint NOT NULL, -- whos turn is it. Always the players id ie p1_id or p2_id
+  passcount int NOT NULL DEFAULT 0, -- game ends in a draw if there are three passess in a row 
+  start_ts timestamp DEFAULT NOW (), 
+  last_update_ts timestamp DEFAULT NOW(),
+
 	p1_score int NOT NULL DEFAULT 0,
 	p2_score int NOT NULL DEFAULT 0,
 	p1_hand varchar(7), -- can be null if player uses every letter in end game
 	p2_hand varchar(7),
 	current_round int NOT NULL DEFAULT 0,
 	letters_left varchar(100) DEFAULT
-	 'AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ',
+	 'AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ  ',
 	winner int DEFAULT 0,
 -- 	board text[15][15] DEFAULT '{{"TL",,"T","D","T"},{"D","T","T","D","A"}}',
 	board text[15][15] DEFAULT  '{{"TW", "NM", "NM", "DL", "NM", "NM", "NM", "TW", "NM", "NM", "NM", "DL", "NM", "NM", "TW"}
