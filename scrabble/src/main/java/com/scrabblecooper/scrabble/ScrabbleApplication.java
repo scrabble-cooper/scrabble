@@ -122,6 +122,39 @@ public class ScrabbleApplication {
 		}
 	}
 
+	@PostMapping("/drawIntoHand")
+	public void drawIntoHand(@RequestBody handMSG hdMSG){
+		DatabaseConnectionManager dcm = new DatabaseConnectionManager("db",
+				"scrabble", "postgres", "password");
+		Game game = new Game();
+		Game updatedGame = new Game();
+
+		try {
+			Connection connection = dcm.getConnection();
+			//Update Game
+			GameDAO gameDAO = new GameDAO(connection);
+			int gameID = hdMSG.getGameID();
+			String letter = hdMSG.getLetter();
+
+			game = gameDAO.findById(gameID);
+			System.out.println("Old hand:");
+			System.out.println("Player 1: " + game.getP1Hand());
+			System.out.println("Player 2: " + game.getP2Hand());
+
+			gameDAO.drawIntoP1Hand(gameID, letter); // Adds letter into p1_hand in games table
+			gameDAO.drawIntoP2Hand(gameID, letter); // Adds letter into p2_hand in games table
+
+			//re-access data object to confirm changes
+			updatedGame = gameDAO.findById(gameID);
+			System.out.println("New hand:");
+			System.out.println("Player 1: " + updatedGame.getP1Hand());
+			System.out.println("Player 2: " + updatedGame.getP2Hand());
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	public static void main(String[] args) {
 		System.out.println("Hello Spring Boot");
