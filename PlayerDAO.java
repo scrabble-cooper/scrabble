@@ -40,22 +40,13 @@ public class PlayerDAO extends DataAccessObject{
 
     public Player findByUsername(String user_name) {
         Player player = new Player();
-        try(PreparedStatement statement = this.connection.prepareStatement(GET_USER_ID,TYPE_SCROLL_INSENSITIVE);) {
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_USER_ID);) {
             statement.setString(1, user_name);
             ResultSet rs = statement.executeQuery();
-            /*
-            Should only be one return at most
-             */
-            if (rs.last ()) {
-                if (rs.getRow() == 1) {
-                    player.setPlayerId(rs.getLong("user_id"));
-                    player.setPassword(rs.getString("password"));
-                    player.setUserName(user_name);
-                }
-                else {
-                    // database error multiple users with the same name
-                    System.out.println("Multiple players with the same user name.");
-                }
+            if (rs.next()) {
+                player.setPlayerId(rs.getLong("user_id"));
+                player.setPassword(rs.getString("password"));
+                player.setUserName(user_name);
             }
             else {
                 // user_name not found
