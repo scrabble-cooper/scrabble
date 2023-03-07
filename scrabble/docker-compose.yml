@@ -2,7 +2,7 @@ services:
   db:
     image: postgres
     volumes:
-      - /home/melina/srv/postgres:/var/lib/postgresql/data
+      - /home/scm2001/srv/postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=scrabble
       - POSTGRES_USER=postgres

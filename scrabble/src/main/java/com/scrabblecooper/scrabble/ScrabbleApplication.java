@@ -72,8 +72,8 @@ public class ScrabbleApplication {
 
 			 game = gameDAO.findById(gameID);
 			 System.out.println("Old score:");
-			 System.out.println(game.getP1Score());
-			 System.out.println(game.getP2Score());
+			 System.out.println("Player 1: " + game.getP1Score());
+			 System.out.println("Player 2: " + game.getP2Score());
 
 			 gameDAO.updateP1Score(gameID, points); // Adds points to p1_score in games table
 			 gameDAO.updateP2Score(gameID, points); // Adds points to p2_score in games table
@@ -81,8 +81,8 @@ public class ScrabbleApplication {
 			 //re-access data object to confirm changes
 			 updatedGame = gameDAO.findById(gameID);
 			 System.out.println("New score:");
-			 System.out.println(updatedGame.getP1Score());
-			 System.out.println(updatedGame.getP2Score());
+			 System.out.println("Player 1: " + updatedGame.getP1Score());
+			 System.out.println("Player 2: " + updatedGame.getP2Score());
 		 }
 		 catch(SQLException e) {
 			 e.printStackTrace();
@@ -104,18 +104,18 @@ public class ScrabbleApplication {
 			String letter = hdMSG.getLetter();
 
 			game = gameDAO.findById(gameID);
-			System.out.println("Old score:");
-			System.out.println(game.getP1Hand());
-			System.out.println(game.getP2Hand());
+			System.out.println("Old hand:");
+			System.out.println("Player 1: " + game.getP1Hand());
+			System.out.println("Player 2: " + game.getP2Hand());
 
 			gameDAO.drawFromP1Hand(gameID, letter); // Removes letter from p1_hand in games table
 			gameDAO.drawFromP2Hand(gameID, letter); // Removes letter from p2_hand in games table
 
 			//re-access data object to confirm changes
 			updatedGame = gameDAO.findById(gameID);
-			System.out.println("New score:");
-			System.out.println(updatedGame.getP1Hand());
-			System.out.println(updatedGame.getP2Hand());
+			System.out.println("New hand:");
+			System.out.println("Player 1: " + updatedGame.getP1Hand());
+			System.out.println("Player 2: " + updatedGame.getP2Hand());
 		}
 		catch(SQLException e) {
 			e.printStackTrace();

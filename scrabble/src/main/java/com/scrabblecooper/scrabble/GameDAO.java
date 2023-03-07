@@ -116,7 +116,7 @@ public class GameDAO extends DataAccessObject {
             statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
             ResultSet rs = statement.executeQuery();
             while(rs.next()){
-                updated_hand = rs.getString(1).replaceFirst(letter, "");
+                updated_hand = rs.getString(1).replaceFirst(letter.toLowerCase(), "");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -142,7 +142,7 @@ public class GameDAO extends DataAccessObject {
             statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
             ResultSet rs = statement.executeQuery();
             while(rs.next()){
-                updated_hand = rs.getString(1).replaceFirst(letter, "");
+                updated_hand = rs.getString(1).replaceFirst(letter.toLowerCase(), "");
             }
         } catch (SQLException e) {
             e.printStackTrace();
