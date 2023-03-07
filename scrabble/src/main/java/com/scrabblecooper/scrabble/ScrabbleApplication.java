@@ -89,6 +89,39 @@ public class ScrabbleApplication {
 		 }
 	 }
 
+	@PostMapping("/drawFromHand")
+	public void drawFromHand(@RequestBody handMSG hdMSG){
+		DatabaseConnectionManager dcm = new DatabaseConnectionManager("db",
+				"scrabble", "postgres", "password");
+		Game game = new Game();
+		Game updatedGame = new Game();
+
+		try {
+			Connection connection = dcm.getConnection();
+			//Update Game
+			GameDAO gameDAO = new GameDAO(connection);
+			int gameID = hdMSG.getGameID();
+			String letter = hdMSG.getLetter();
+
+			game = gameDAO.findById(gameID);
+			System.out.println("Old score:");
+			System.out.println(game.getP1Hand());
+			System.out.println(game.getP2Hand());
+
+			gameDAO.drawFromP1Hand(gameID, letter); // Removes letter from p1_hand in games table
+			gameDAO.drawFromP2Hand(gameID, letter); // Removes letter from p2_hand in games table
+
+			//re-access data object to confirm changes
+			updatedGame = gameDAO.findById(gameID);
+			System.out.println("New score:");
+			System.out.println(updatedGame.getP1Hand());
+			System.out.println(updatedGame.getP2Hand());
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	public static void main(String[] args) {
 		System.out.println("Hello Spring Boot");

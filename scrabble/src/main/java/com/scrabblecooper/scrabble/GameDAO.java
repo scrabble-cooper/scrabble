@@ -12,6 +12,10 @@ public class GameDAO extends DataAccessObject {
     private static final String GET_P2_SCORE = "SELECT p2_score FROM games WHERE game_id=?";
     private static final String UPDATE_P1_SCORE = "UPDATE games SET p1_score=? WHERE game_id=?";
     private static final String UPDATE_P2_SCORE = "UPDATE games SET p2_score=? WHERE game_id=?";
+    private static final String GET_P1_HAND = "SELECT p1_hand FROM games WHERE game_id=?";
+    private static final String GET_P2_HAND = "SELECT p2_hand FROM games WHERE game_id=?";
+    private static final String UPDATE_P1_HAND = "UPDATE games SET p1_hand=? WHERE game_id=?";
+    private static final String UPDATE_P2_HAND = "UPDATE games SET p2_hand=? WHERE game_id=?";
 
     public GameDAO(Connection connection) {
         super(connection);
@@ -58,17 +62,17 @@ public class GameDAO extends DataAccessObject {
         // Gets p1_score from table games
         int updated_score = 0;
         try(PreparedStatement statement = this.connection.prepareStatement(GET_P1_SCORE);) {
-            statement.setLong(1, gameID);
+            statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_SCORE
             ResultSet rs = statement.executeQuery();
             while(rs.next()){
-                updated_score = rs.getInt(1) + points;
+                updated_score = rs.getInt(1) + points; // Updates p1_score
             }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
 
-        // Updates p1_score in table games
+        // Sets updated p1_score in table games
         try(PreparedStatement statement2 = this.connection.prepareStatement(UPDATE_P1_SCORE);) {
             statement2.setLong(1, updated_score);
             statement2.setLong(2, gameID);
@@ -83,19 +87,71 @@ public class GameDAO extends DataAccessObject {
         // Gets p2_score from table games
         int updated_score = 0;
         try(PreparedStatement statement = this.connection.prepareStatement(GET_P2_SCORE);) {
-            statement.setLong(1, gameID);
+            statement.setLong(1, gameID); // Passing in gameID to statement GET_P2_SCORE
             ResultSet rs = statement.executeQuery();
             while(rs.next()){
-                updated_score = rs.getInt(1) + points;
+                updated_score = rs.getInt(1) + points; // Updates p2_score
             }
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
 
-        // Updates p2_score in table games
+        // Sets updated p2_score in table games
         try(PreparedStatement statement = this.connection.prepareStatement(UPDATE_P2_SCORE);) {
             statement.setInt(1, updated_score);
+            statement.setLong(2, gameID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Draw letter from Player 1's Hand
+    public void drawFromP1Hand(long gameID, String letter) {
+        // Gets p2_score from table games
+        String updated_hand = "";
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_P1_HAND);) {
+            statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()){
+                updated_hand = rs.getString(1).replaceFirst(letter, "");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        // Sets updated p1_hand in table games
+        try(PreparedStatement statement = this.connection.prepareStatement(UPDATE_P1_HAND);) {
+            statement.setString(1, updated_hand);
+            statement.setLong(2, gameID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Draw letter from Player 1's Hand
+    public void drawFromP2Hand(long gameID, String letter) {
+        // Gets p2_score from table games
+        String updated_hand = "";
+        try(PreparedStatement statement = this.connection.prepareStatement(GET_P2_HAND);) {
+            statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()){
+                updated_hand = rs.getString(1).replaceFirst(letter, "");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        // Sets updated p1_hand in table games
+        try(PreparedStatement statement = this.connection.prepareStatement(UPDATE_P2_HAND);) {
+            statement.setString(1, updated_hand);
             statement.setLong(2, gameID);
             statement.executeUpdate();
         } catch (SQLException e) {
