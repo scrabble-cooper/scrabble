@@ -1,7 +1,5 @@
 # scrabble
 
-## TEMP NOTES: important commands
-
 ### LOCAL DATABASE
 
 Starting local postgres:
@@ -36,6 +34,8 @@ Testing functions:
  curl -X POST -H "Content-Type: application/json" -d '{"gameID": 12, "charToChange":"RDW", "boardRow":1, "boardCol":1}' http://localhost:8080/updateBoard
 
  curl -X POST -H "Content-Type: application/json" -d '{"gameID": 12, "letter": "E"}' http://localhost:8080/drawFromHand
+ 
+ curl -X POST -H "Content-Type: application/json" -d '{"gameID": 12, "letter": "E"}' http://localhost:8080/drawIntoHand
 
  curl -X POST -H "Content-Type: application/json" -d '{"gameID": 12, "points": 2}' http://localhost:8080/updatePoints
  ```
