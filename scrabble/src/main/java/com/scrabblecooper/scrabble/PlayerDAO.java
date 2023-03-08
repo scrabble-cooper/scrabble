@@ -1,5 +1,5 @@
-package com.scrabble.jdbc;
-import com.scrabble.jdbc.util.DataAccessObject;
+package com.scrabblecooper.scrabble;
+import com.scrabblecooper.scrabble.util.DataAccessObject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,10 +11,13 @@ import static java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE;
 public class PlayerDAO extends DataAccessObject{
 
     private static final String GET_USER = "SELECT user_id, user_name, password " +
-            "FROM users WHERE user_id=?";
+        "FROM users WHERE user_id=?";
 
     private static final String GET_USER_ID = "SELECT user_id, password " +
-            "FROM users WHERE user_name=?";
+        "FROM users WHERE user_name=?";
+
+    private static final String INSERT = "INSERT INTO users (user_name, password) " +
+        " VALUES (?, ?)";
 
     public PlayerDAO(Connection connection) {
         super(connection);
@@ -58,4 +61,18 @@ public class PlayerDAO extends DataAccessObject{
         }
         return player;
     }
+
+    public void create(Player dto){
+        try(PreparedStatement statement = this.connection.prepareStatement(INSERT);) {
+            // counts from 1
+            statement.setString(1, dto.getUserName());
+            statement.setString(2, dto.getPassword());
+            statement.execute();
+        } catch(SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+    }
+    }
+
+    
 }

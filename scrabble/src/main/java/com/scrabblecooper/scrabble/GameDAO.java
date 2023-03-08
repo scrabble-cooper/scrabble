@@ -137,7 +137,7 @@ public class GameDAO extends DataAccessObject {
     
     public void addToLetterBag(long gameID, String letter) {
         // Gets letter bag from table games
-        String updated_letter_bag = "";
+        String updated_letterbag = "";
         try (PreparedStatement statement = this.connection.prepareStatement(GET_LETTERBAG);) {
             statement.setLong(1, gameID); // Passing in gameID to statement GET_P1_HAND
             ResultSet rs = statement.executeQuery();

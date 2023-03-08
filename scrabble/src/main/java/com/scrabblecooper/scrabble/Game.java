@@ -16,6 +16,7 @@ public class Game implements DataTransferObject {
     private String p2Hand;
     private int winner;
     private Array board;
+
     public long getGameId() {
         return gameId;
     }
@@ -101,7 +102,7 @@ public class Game implements DataTransferObject {
     }
 
 //    public void setBoard(String board) {
-        public void setBoard(Array board) {
+     public void setBoard(Array board) {
         this.board = board;
     }
 

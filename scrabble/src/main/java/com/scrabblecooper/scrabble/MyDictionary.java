@@ -1,6 +1,5 @@
-package com.scrabble.jdbc;
-
-import com.scrabble.jdbc.util.DataTransferObject;
+package com.scrabblecooper.scrabble;
+import com.scrabblecooper.scrabble.util.DataTransferObject;
 
 // Had to be called MyDictionary so not as to confuse with java.util.dictionary
 public class MyDictionary implements DataTransferObject {

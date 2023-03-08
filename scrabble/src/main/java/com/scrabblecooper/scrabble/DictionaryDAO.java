@@ -1,6 +1,5 @@
-package com.scrabble.jdbc;
-
-import com.scrabble.jdbc.util.DataAccessObject;
+package com.scrabblecooper.scrabble;
+import com.scrabblecooper.scrabble.util.DataAccessObject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

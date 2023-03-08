@@ -1,5 +1,5 @@
-package com.scrabble.jdbc;
-import com.scrabble.jdbc.util.DataTransferObject;
+package com.scrabblecooper.scrabble;
+import com.scrabblecooper.scrabble.util.DataTransferObject;
 
 public class Player implements DataTransferObject {
 

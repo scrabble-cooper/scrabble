@@ -1,4 +1,4 @@
-package com.scrabble.jdbc;
+package com.scrabblecooper.scrabble;
 
 import java.sql.*;
 import java.io.BufferedReader;

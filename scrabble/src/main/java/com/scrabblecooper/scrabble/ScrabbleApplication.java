@@ -2,11 +2,18 @@ package com.scrabblecooper.scrabble;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.*;
+
+import static java.lang.System.exit;
 
 @SpringBootApplication
 @RestController
@@ -155,11 +162,136 @@ public class ScrabbleApplication {
 		}
 	}
 
-
 	public static void main(String[] args) {
 		System.out.println("Hello Spring Boot");
-		SpringApplication.run(ScrabbleApplication.class, args); //keep this line only
-
+		ApplicationContext applicationContext = SpringApplication.run(ScrabbleApplication.class);
+		Controller service = applicationContext.getBean(Controller.class);
+		service.Controller();
+		// SpringApplication.run(ScrabbleApplication.class, args); //keep this line only
 	}
 }
 
+@Service
+class Controller{
+	public void Controller(){
+		try{
+			while (true) {
+				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+				System.out.println("[1] Create Account");
+				System.out.println("[2] Log In");
+				System.out.println("[3] Exit");
+
+				int startChoice = Integer.parseInt(br.readLine());
+
+				if(startChoice == 1){
+					createAccountController();
+				}
+				if(startChoice == 2){
+//					loginController();
+				}
+				if(startChoice == 3){
+					exit(0);
+				}
+			}
+		}
+		catch(IOException ex){
+			System.out.println(ex);
+		}
+	}
+
+	public void createAccountController(){
+		DatabaseConnectionManager dcm = new DatabaseConnectionManager("db",
+				"scrabble", "postgres", "password");
+
+		// Player tempPlayer = new Player();
+
+		try{
+			while(true) {
+				Connection connection = dcm.getConnection();
+				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+				System.out.print("Username :");
+				String username = br.readLine();
+				System.out.print("Password :");
+				String password = br.readLine();
+
+				Player player = new Player();
+				player.setUserName(username);
+				player.setPassword(password);
+				PlayerDAO playerDAO = new PlayerDAO(connection);
+				playerDAO.create(player);
+
+				System.out.println();
+				System.out.println("Account created!");
+				System.out.println("Username: " + player.getUserName());
+				System.out.println("Password: " + player.getPassword());
+
+				// tempPlayer = playerDAO.findByUsername(tempUsername);
+
+				// if ((player.getUserName().compareToIgnoreCase(tempUsername) == 0) && (player.getPassword().compareTo(tempPassword) == 0))
+				// {
+				// 	// System.out.println(player.getPlayerId() + " " + player.getUserName() + " " + player.getPassword());
+				// 	break;
+				// }
+				// else
+				// {
+				// 	player       = null;
+				// 	tempUsername = "";
+				// 	tempPassword = "";
+				// }
+
+				newGameController(player);
+			}
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+		catch(IOException ex){
+			System.out.println(ex);
+		}
+	}
+
+	public void newGameController(Player p1){
+		DatabaseConnectionManager dcm = new DatabaseConnectionManager("db",
+				"scrabble", "postgres", "password");
+
+		try{
+			while(true) {
+				Connection connection = dcm.getConnection();
+				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+				Player p2 = new Player();
+				p2.setUserName("computer");
+				p2.setPassword("123");
+				PlayerDAO playerDAO = new PlayerDAO(connection);
+				playerDAO.create(p2);
+
+				System.out.println("============== BEGIN =====================");
+
+				GameDAO gameDAO = new GameDAO(connection);
+
+				System.out.println("Done until here");
+
+
+				// tempPlayer = playerDAO.findByUsername(tempUsername);
+
+				// if ((player.getUserName().compareToIgnoreCase(tempUsername) == 0) && (player.getPassword().compareTo(tempPassword) == 0))
+				// {
+				// 	// System.out.println(player.getPlayerId() + " " + player.getUserName() + " " + player.getPassword());
+				// 	break;
+				// }
+				// else
+				// {
+				// 	player       = null;
+				// 	tempUsername = "";
+				// 	tempPassword = "";
+				// }
+
+			}
+		}
+		catch(SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+}
