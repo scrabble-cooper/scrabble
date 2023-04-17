@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="305.35287"
+   height="315.35287"
+   viewBox="0 0 305.35286 315.3529"
+   version="1.1"
+   id="svg2216"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="scrabble-tile-letter-e-eeddbb.svg">
+  <defs
+     id="defs2210" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="169.61839"
+     inkscape:cy="126.00682"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1366"
+     inkscape:window-height="705"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     fit-margin-top="10"
+     fit-margin-left="10"
+     fit-margin-bottom="20"
+     fit-margin-right="10"
+     inkscape:showpageshadow="false"
+     inkscape:document-rotation="0"
+     lock-margins="false" />
+  <metadata
+     id="metadata2213">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(90.792198,-23.029976)">
+    <rect
+       ry="9.6428576"
+       rx="9.6428576"
+       y="33.779976"
+       x="-80.042198"
+       height="283.85287"
+       width="283.85287"
+       id="rect842"
+       style="fill:#eeddbb;fill-opacity:1;stroke:#111111;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
+    <g
+       transform="translate(0,-6)"
+       id="text828"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:76.5333px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       aria-label="E">
+      <path
+         inkscape:connector-curvature="0"
+         id="path817"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:233.333px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Semi-Bold'"
+         d="M 108.99524,259.3327 H 14.773238 V 92.763696 H 108.99524 V 115.77802 H 42.003055 v 45.34505 h 62.776695 v 22.78646 H 42.003055 v 52.29492 h 66.992185 z" />
+    </g>
+    <g
+       id="text836"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:68.3679px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.893309"
+       transform="matrix(1.1194341,0,0,0.89330851,0,-6)"
+       aria-label="1">
+      <path
+         inkscape:connector-curvature="0"
+         id="path820"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Semi-Bold';stroke-width:0.893309"
+         d="m 139.47702,332.89581 h -7.84494 V 301.3825 q 0,-5.64169 0.26706,-8.94658 -0.76781,0.80118 -1.90282,1.76928 -1.10163,0.9681 -7.47774,6.14243 l -3.93916,-4.97403 14.35458,-11.28337 h 6.54302 z" />
+    </g>
+  </g>
+</svg>
