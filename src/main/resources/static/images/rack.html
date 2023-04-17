@@ -1,0 +1,54 @@
+<html>
+<head>
+    <title>Drag and Drop</title>
+</head>
+<style>
+img{
+  width:50px;
+  height:50px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+td{
+  width:60px;
+  height:60px;
+  text-align:center;
+}
+</style>
+<body>
+    <center>
+            <table border="1" width="500px" height="60px">
+                <tr id="rack">
+                    <td id="rack_1"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r1" src="r.svg" /></td>
+                    <td id="rack_2"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r2" src="e.svg" /></td>
+                    <td id="rack_3"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r3" src="t.svg" /></td>
+                    <td id="rack_4"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r4" src="a.svg" /></td>
+                    <td id="rack_5"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r5" src="i.svg" /></td>
+                    <td id="rack_6"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r6" src="n.svg" /></td>
+                    <td id="rack_7"   ondrop="drop(event)" ondragover="allowDrop(event)"><img id="r7" src="s.svg" /></td>
+                    <td id="rack_8"   ondrop="drop(event)" ondragover="allowDrop(event)"></td>
+                    <td id="rack_9"   ondrop="drop(event)" ondragover="allowDrop(event)"></td>
+                    <td id="rack_10"  ondrop="drop(event)" ondragover="allowDrop(event)"></td>
+                </tr>
+            </table>
+        </center>
+    </body>
+<script>
+//myPic = document.getElementById('refImage');
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);  
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    var data = ev.dataTransfer.getData("text");
+    ev.target.appendChild(document.getElementById(data));
+}
+</script>
+</html>

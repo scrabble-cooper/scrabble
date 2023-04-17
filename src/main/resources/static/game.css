@@ -1,0 +1,55 @@
+#mid-page {
+                  display : flex;
+                  width : 100%;
+                  background-color: green;
+
+          }
+
+#left-mid-page {
+                  display : flex;
+                  flex-direction: column;
+                  width : 350px;
+                  background-color: yellow;
+                  block;
+             }
+#mid-mid-page {
+                  display : flex;
+                  width : 950px;
+                  background-color: red;
+              }
+#right-mid-page {
+                  display : flex;
+                  width : 500px;
+                  background-color: blue;
+                  flex-direction: column;
+             }
+
+.header-image {
+                    height: 75px;
+                 }
+#board-table  {
+                 border-collapse: collapse;
+}
+#board-table td {
+                   padding: 0px; border: solid 2px #777; height: 55px; width: 55px; vertical-align: middle; text-align: center; margin: auto;
+}
+
+#rack {
+                 padding: 0px; height: 55px; width: 55px;
+}
+#rack td {
+                 padding: 0px; border: solid 2px #777;
+}
+#rack img {
+                 height: 50px; width: 50px; padding: 0px;
+}
+.triple-word    { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: red; }
+.double-word    { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: deeppink; }
+.triple-letter  { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: blue; }
+.double-letter  { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: deepskyblue; }
+.plain-score    { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: bisque; }
+.board-image    { height: 55px; width: 55px; padding: 0px; vertical-align: middle; text-align: center; margin: auto; }
+.board-wild-img { height: 45px; width: 45px; padding: 0px; vertical-align: middle; text-align: center; margin: auto; }
+.board-wild-td  { padding: 0px; border: solid 2px #777; height: 55px; width: 55px; background-color: lightgreen; vertical-align: middle; text-align: center; margin: auto;}
+
+.highlight-game  {  background-color: DarkKhaki; }
