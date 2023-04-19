@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="305.35287"
+   height="315.35287"
+   viewBox="0 0 305.35286 315.3529"
+   version="1.1"
+   id="svg2216"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="scrabble-tile-letter-k-eeddbb.svg">
+  <defs
+     id="defs2210" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.9899495"
+     inkscape:cx="338.46325"
+     inkscape:cy="245.9621"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1366"
+     inkscape:window-height="705"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     fit-margin-top="10"
+     fit-margin-left="10"
+     fit-margin-bottom="20"
+     fit-margin-right="10"
+     inkscape:showpageshadow="false"
+     inkscape:document-rotation="0"
+     lock-margins="false" />
+  <metadata
+     id="metadata2213">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(90.792198,-23.029976)">
+    <rect
+       ry="9.5648823"
+       rx="9.5648823"
+       y="33.779976"
+       x="-80.042198"
+       height="283.85287"
+       width="283.85287"
+       id="rect842"
+       style="fill:#eeddbb;fill-opacity:1;stroke:#111111;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke fill markers" />
+    <g
+       transform="translate(-12,-6)"
+       id="text828"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:76.5333px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
+       aria-label="K">
+      <path
+         inkscape:connector-curvature="0"
+         id="path817"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:233.333px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Semi-Bold'"
+         d="M 133.88945,259.3327 H 102.3302 L 50.035282,183.90953 33.970829,197.01174 V 259.3327 H 6.7410118 V 92.763696 H 33.970829 V 172.28843 Q 45.136193,158.61656 56.187625,145.97007 L 101.19088,92.763696 h 30.98958 Q 88.544395,144.03323 69.631635,165.79429 Z" />
+    </g>
+    <g
+       id="text836"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:68.3679px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.893309"
+       transform="matrix(1.1194341,0,0,0.89330851,-12,-6)"
+       aria-label="5">
+      <path
+         inkscape:connector-curvature="0"
+         id="path820"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Semi-Bold';stroke-width:0.893309"
+         d="m 149.08028,302.41736 q 7.37759,0 11.68397,3.90578 4.30637,3.90579 4.30637,10.6491 0,7.81156 -4.90726,12.21809 -4.87389,4.37314 -13.88723,4.37314 -8.17877,0 -12.85236,-2.63724 v -7.11053 q 2.704,1.53561 6.20919,2.37018 3.50519,0.83457 6.50964,0.83457 5.30786,0 8.07863,-2.37018 2.77076,-2.37017 2.77076,-6.94361 0,-8.74628 -11.14983,-8.74628 -1.56899,0 -3.8724,0.33383 -2.30341,0.30044 -4.03932,0.70104 l -3.50519,-2.06973 1.86944,-23.83529 h 25.37089 v 6.977 h -18.46066 l -1.10163,12.08455 q 1.16839,-0.20029 2.83753,-0.46736 1.70252,-0.26706 4.13946,-0.26706 z" />
+    </g>
+  </g>
+</svg>

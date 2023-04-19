@@ -1,0 +1,17 @@
+
+services:
+  db:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scrabble
+      PGDATA: /data/postgres
+
+    restart: unless-stopped
+
+
+
+
+
