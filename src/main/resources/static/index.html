@@ -9,7 +9,8 @@
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <script src="common.js"></script>
-    <script src="game.js"></script>
+    <script src="board.js"></script>
+    <script src="rack.js"></script>
     <link rel="icon" type="image/png" src="images/myicon.png">
 </head>
 <body>
@@ -25,10 +26,12 @@
                     <label >Sign In</label>
                     <br>
                     <label for="name"> Username </label>
-                    <input type="text" id="name" class="form-control" placeholder="Existing User">
+                    <input type="text" id="name" class="form-control" placeholder="Existing User"
+                           title="Must contain between 4 and 10 alphabetic characters. No spaces">
                     <br>
                     <label for="password"> Password </label>
-                    <input type="password" id="password" class="form-control" placeholder="abcd1234">
+                    <input type="password" id="password" class="form-control" placeholder="abcd1234"
+                           title="Must contain at least one number and one uppercase and lowercase letter, and 6 to 10 characters. No spaces">
                     <button id="signin" class="btn btn-default" type="submit">Sign In</button>
                 </div>
                 <div>
@@ -36,13 +39,16 @@
                     <label > or Register</label>
                     <br>
                     <label for="regname"> Username</label>
-                    <input type="text" id="regname" class="form-control" placeholder="New User">
+                    <input type="text" id="regname" class="form-control" placeholder="NewUser"
+                           title="Must contain between 4 and 10 Alphabetic characters. No spaces">
                     <br>
                     <label for="regpassword1"> Password </label>
-                    <input type="password" id="regpassword1" class="form-control" placeholder="abcd1234">
+                    <input type="password" id="regpassword1" class="form-control" placeholder="Abcd1234"
+                           title="Must contain at least one number and one uppercase and lowercase letter, and 6 to 10 characters. No spaces">
                     <br>
                     <label for="regpassword2"> Password </label>
-                    <input type="password" id="regpassword2" class="form-control" placeholder="abcd1234">
+                    <input type="password" id="regpassword2" class="form-control" placeholder="abcd1234"
+                           title="Must contain at least one number and one uppercase and lowercase letter, and 6 to 10 characters. No spaces">
                     <button id="register" class="btn btn-default" type="submit">Register</button>
                 </div>
             </form>
@@ -74,6 +80,19 @@
         <br>
     </div>
     <div id="right-mid-page">
+
+        <div id="player_score_div">
+            <div id="player_one_score">
+
+            </div>
+            <div id="game_round">
+
+            </div>
+            <div id="player_two_score" >
+
+            </div>
+
+        </div>
         <div id="rack_div">
             <table id="rack">
                 <tr id="rack_tr">
@@ -81,80 +100,88 @@
                 </tr>
             </table>
             <button onclick =" resetRack ()" id="reset-rack_btn" class="btn btn-default" >Retract Letters</button>
+
         <br />
         </div>
         <div id="action_div">
             <table id="action_table">
 
                 <tr id="action_tr">
+                    <td><button onclick ="movePlay      ()" id="move-play-btn" class="btn btn-default" >Play</button></td>
+                    <td><button onclick ="movePass      ()" id="move-pass-btn" class="btn btn-default" >Pass</button></td>
+                    <td><button onclick ="moveExchange  ()" id="move-exchange-btn" class="btn btn-default" >Exchange</button></td>
+                    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    <td><button onclick ="Resign    ()" id="resign-btn" class="btn btn-default" >Resign</button></td>
+                </tr>
+            </table>
 
-                </tr>
-                <tr>
-                    <td><button onclick =" playMove  ()" id="reset-rack_btn" class="btn btn-default" >Play</button></td>
-                    <td><button onclick =" passMove  ()" id="reset-rack_btn" class="btn btn-default" >Pass</button></td>
-                    <td><button onclick =" xLetters  ()" id="reset-rack_btn" class="btn btn-default" >Exchange</button></td>
-                    //<td><button onclick =" accept    ()" id="reset-rack_btn" class="btn btn-default" >AcceptMove</button></td>
-                    <td><button onclick =" challenge ()" id="reset-rack_btn" class="btn btn-default" >Challenge</button></td>
-                </tr>
+        </div>
+        <div id="letters_div">
+        </div>
+        <div id="last_move_div">
+        </div>
+        <div id="challenge_div">
+            <div id="score_div">
+               <table id="score_tbody">
+
+               </table>
+            </div>
+            <div id="challenge_btn_div">
+                <table id="challenge_table">
+
+                    <tr id="challenge_tr">
+                        <td id="challenge_text"></td>
+                        <td>&nbsp;&nbsp;&nbsp;<button onclick ="accept    ()" id="accept-btn" class="btn btn-default" >No Challenge</button>&nbsp;</td>
+                        <td>&nbsp;&nbsp;&nbsp;<button onclick ="challenge ()" id="challenge-btn" class="btn btn-default" >Challenge</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="word_response_div">
+            <table id="word_response_table">
+
             </table>
 
         </div>
 
 
-
     </div>
-
 </div>
 <div id="bottom-of-page">
 </div>
-<script>
 
+<script>
+    const droponabletd = document.querySelector('#droptemplate');
     outputTitle ("Words With Nerds","top-of-page" );
     var termID        = generateString(10);
     var userName      = "";
     var userID        = -1;
     var currentGameID = -1;
+    var dragFromID    = 0;
+
+    // The currentGame  object contains
+    // game_id  p1_iD p2_iD p1_username p2_username p1_score p2_score letters_left current_round p1_hand p2_hand winner board players_turn_id
+    // lastplay playedby challengecount passcount
+
+    hideChallengeDiv ();
+
+    disableActionButtons ();
+
+    var currentGame   = null;
+
+    let bNode = document.getElementById('board-body');
+
+    var mt = new board (bNode, 15, 225, scrabbleBk)
 
     connect ();
-    console.log(userName);
 
-    var boardStr =     "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " +
-                       "               " ;
-    /*
-                     "qWAMBE         " +
-                     "U              " +
-                     "A              " +
-                     "N              " +
-                     "G              " +
-                     "O              " +
-                     "SH             " +
-                     " OCTAVES       " +
-                     " T             " +
-                     " e             " +
-                     " L             " +
-                     "               " +
-                     "               " +
-                     "               " +
-                     "               " ;
-    */
+    mt.appendBoard(blankStart, blankStart, blankStart);
 
-    displayBoard(boardStr);
-
-    var myRack = " SIGN*IN ";
+    var myExchange = "         ";
+    var myRack =     " SIGN*IN ";
     displayRack();
+
+    var myListOfGameIDs = [];
 
     // An array to store the letters placed on the board from the players rack this current turn.
     // The player may retract and exchange letters with their rack at will until they finish their turn.

@@ -165,13 +165,14 @@ public class SignInController {
 		//}
 		//catch (Exception ex) { System.out.println ("CreateGame cannot parse JSON : " + message + ex); }
 		//Long userid = ((Long) pM.get ("userid"));
-		Long userid = jo.getLong("userid");
+		Long userid   = jo.getLong("userid");
+		String username = jo.getString("username");
 		String txName = jo.getString("txName");    // must always be present
 
 		String Response = "UserID not found: " + userid + ".";
 
     	GameDAO gamedao = new GameDAO ();
-		Long newGameID = gamedao.NewGame (userid);
+		Long newGameID = gamedao.NewGame (userid,username);
 
 		JSONObject jUser = new JSONObject();
 
@@ -216,20 +217,21 @@ public class SignInController {
 
 		Long joiningid = jo.getLong("user_id");
 		String txName = jo.getString("txName");    // must always be present
+		String joiningUsername = jo.getString("username");    // must always be present
 
 		Long gameid = jo.getLong("gameID");
 
 		JSONObject jGames = new JSONObject();
 
 		jGames.put ("txData","joingame");
-		jGames.put ("gameID",gameid);
+		jGames.put ("game_id",gameid);
 
 		GameDAO gamedao = new GameDAO ();
 
-		Long opponent = gamedao.joinGame ( gameid, joiningid );
+		Long opponent_id = gamedao.joinGame ( gameid, joiningid,joiningUsername );
 
 		jGames.put ("txName",  txName);
-		jGames.put ("opponnetId",opponent);
+		jGames.put ("opponent_id",opponent_id);
 		return new SignIn (jGames.toString());
 	}
 	@MessageMapping("/refreshopponnent")
@@ -239,14 +241,14 @@ public class SignInController {
 
 		JSONObject jo = new JSONObject(message);
 
-		Long opponenetID = jo.getLong("opponenetid");
+		Long opponentID = jo.getLong("opponent_id");
 		String txName = jo.getString("txName");    // must always be present
 
 		JSONObject jGames = new JSONObject();
 
 		jGames.put ("txData","refreshopponnent");
 
-		jGames.put ("txName",opponenetID);
+		jGames.put ("txName",opponentID);
 		return new SignIn (jGames.toString());
 	}
 
@@ -269,4 +271,168 @@ public class SignInController {
 
 		return new SignIn (jGames.toString());
 	}
+
+	@MessageMapping("/moveplay")
+	@SendTo("/topic/greetings")
+	public SignIn movePlay (@RequestBody String message) throws Exception {
+		Thread.sleep(100); // simulated delay
+
+		JSONObject jo = new JSONObject(message);
+
+		Long gameID   = jo.getLong   ("game_id");
+		String txName = jo.getString ("txName");    // must always be present
+
+		GameDAO gamedao = new GameDAO ();
+
+		gamedao.movePlay (message);
+
+		JSONObject jGames = gamedao.findById (gameID);
+
+		jGames.put ("txData","movePlay");
+		jGames.put ("game_id",gameID);
+		jGames.put ("txName",txName);
+
+		return new SignIn (jGames.toString());
+
+	}
+
+
+	@MessageMapping("/wordquery")
+	@SendTo("/topic/greetings")
+	public SignIn wordQuery (@RequestBody String message) throws Exception {
+		Thread.sleep(100); // simulated delay
+
+		JSONObject jo = new JSONObject(message);
+
+		Long gameID     = jo.getLong   ("game_id");
+		String txName   = jo.getString ("txName");    // must always be present
+		String wordList = jo.getString ("wordlist");
+		Long userID     = jo.getLong   ("user_id");
+
+		DictionaryDAO dictionaryDAO = new DictionaryDAO();
+
+		JSONArray obj = dictionaryDAO.checkWords(wordList);
+
+		JSONObject jReturn = new JSONObject();
+
+		jReturn.put ("dictionary_response",obj);
+		jReturn.put ("txData","wordquery");
+		jReturn.put ("user_id","movePlay");
+		jReturn.put ("game_id",gameID);
+		jReturn.put ("txName",txName);
+
+		return new SignIn (jReturn.toString());
+
+	}
+
+	@MessageMapping("/lastmovemakepermanent")
+	@SendTo("/topic/greetings")
+	public SignIn lastMoveMakePermanent (@RequestBody String message) throws Exception {
+		Thread.sleep(100); // simulated delay
+
+		JSONObject jo = new JSONObject(message);
+
+		Long gameID     = jo.getLong   ("game_id");
+		String txName   = jo.getString ("txName");    // must always be present
+		Long userID     = jo.getLong   ("user_id");
+
+		GameDAO gamedao = new GameDAO();
+
+		gamedao.lastMoveMakePermanent(message);
+
+		JSONObject jReturn = new JSONObject();
+
+		jReturn.put ("txData","lastmovemakepermanent");
+		jReturn.put ("user_id",userID);
+		jReturn.put ("game_id",gameID);
+		jReturn.put ("txName",txName);
+
+		return new SignIn (jReturn.toString());
+
+	}
+
+
+	@MessageMapping("/unmakelastmove")
+	@SendTo("/topic/greetings")
+	public SignIn unMakeLastMove (@RequestBody String message) throws Exception {
+		Thread.sleep(100); // simulated delay
+
+		JSONObject jo = new JSONObject(message);
+
+		Long gameID     = jo.getLong   ("game_id");
+		String txName   = jo.getString ("txName");    // must always be present
+		Long userID     = jo.getLong   ("user_id");
+
+		GameDAO gamedao = new GameDAO();
+
+		gamedao.unMakeLastMove(message);
+
+		JSONObject jReturn = new JSONObject();
+
+		jReturn.put ("txData","unmakelastmove");
+		jReturn.put ("user_id",userID);
+		jReturn.put ("game_id",gameID);
+		jReturn.put ("txName",txName);
+
+		return new SignIn (jReturn.toString());
+
+	}
+
+
+
+
+
+	@MessageMapping("/movepass")
+	@SendTo("/topic/greetings")
+	public SignIn movePass (@RequestBody String message) throws Exception {
+		Thread.sleep(100); // simulated delay
+
+		JSONObject jo = new JSONObject(message);
+
+		Long gameID     = jo.getLong   ("game_id");
+		String txName   = jo.getString ("txName");    // must always be present
+		Long userID     = jo.getLong   ("user_id");
+
+		GameDAO gamedao = new GameDAO();
+
+		gamedao.movePass(message);
+
+		JSONObject jReturn = new JSONObject();
+
+		jReturn.put ("txData","movepass");
+		jReturn.put ("user_id",userID);
+		jReturn.put ("game_id",gameID);
+		jReturn.put ("txName",txName);
+
+		return new SignIn (jReturn.toString());
+
+	}
+
+	@MessageMapping("/moveexchange")
+	@SendTo("/topic/greetings")
+	public SignIn moveExchange (@RequestBody String message) throws Exception {
+		Thread.sleep(100); // simulated delay
+
+		JSONObject jo = new JSONObject(message);
+
+		Long gameID     = jo.getLong   ("game_id");
+		String txName   = jo.getString ("txName");    // must always be present
+		Long userID     = jo.getLong   ("user_id");
+
+		GameDAO gamedao = new GameDAO();
+
+		gamedao.moveExchange(message);
+
+		JSONObject jReturn = new JSONObject();
+
+		jReturn.put ("txData","moveexchange");
+		jReturn.put ("user_id",userID);
+		jReturn.put ("game_id",gameID);
+		jReturn.put ("txName",txName);
+
+		return new SignIn (jReturn.toString());
+
+	}
+
 }
+

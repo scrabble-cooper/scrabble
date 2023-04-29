@@ -23,7 +23,7 @@ public class Game implements DataTransferObject {
 
     }
 
-    private final static String ALL_LETTERS =  "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ  "; // Do not forget the blanks
+    private final static String ALL_LETTERS =  "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOOOOPPQRRRRRRSSSSTTTTTTUUUUVVWWXYYZ**"; // Do not forget the blanks
     private final static long boardWidth = 15;
     private final static long boardDepth = 15;
 
