@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0da31926-f421-43a4-b667-51aac11c21e3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ScrabbleDB/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/cooper/wordsfornerds/MainApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/cooper/wordsfornerds/MainApp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,7 +161,7 @@
       <workItem from="1682364250425" duration="5225000" />
       <workItem from="1682901392272" duration="3324000" />
       <workItem from="1682957814225" duration="7680000" />
-      <workItem from="1682967386632" duration="1296000" />
+      <workItem from="1682967386632" duration="3082000" />
     </task>
     <servers />
   </component>
