@@ -2,7 +2,7 @@
 services:
   db:
     image: postgres:alpine
-    build: .
+    build: ScrabbleDB
     ports:
       - "5432:5432"
     environment:
