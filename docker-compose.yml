@@ -2,6 +2,7 @@
 services:
   db:
     image: postgres:alpine
+    build: .
     ports:
       - "5432:5432"
     environment:
@@ -11,6 +12,15 @@ services:
 
     restart: unless-stopped
 
+#  app:
+#    build: .
+#    ports:
+#      - 8080:8080
+#    environment:
+#      - POSTGRES_DB=scrabble
+#      - POSTGRES_PASSWORD=password
+#    depends_on:
+#      - db
 
 
 
