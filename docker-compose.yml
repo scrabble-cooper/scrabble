@@ -3,19 +3,22 @@ services:
   db:
     image: postgres:alpine
     build: ScrabbleDB
+    container_name: db
     ports:
       - "5432:5432"
-#    expose:
-#      - "5432:5432"
+    expose:
+      - "5432:5432"
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: scrabble
       PGDATA: /data/postgres
 
-    restart: unless-stopped
+    restart: always
 
   app:
     build: .
+    container_name: app
     ports:
       - "8080:8080"
     expose:
