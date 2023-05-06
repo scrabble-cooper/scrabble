@@ -1,55 +1,143 @@
+#left-response     { width; 90%;}
+#left-response  th {font-size: 20px; text-align: left; font-weight: 200; color: black; padding-left: 10px;}
+#left-response  td {font-size: 20px; text-align: left; font-weight: 400; color: red; padding-left: 10px;}
+
 #mid-page {
                   display : flex;
                   width : 100%;
-                  background-color: green;
+                  background-color: GhostWhite;
 
           }
+
+input[type=radio] { width: 20px; height: 20px; }
+
 
 #left-mid-page {
                   display : flex;
                   flex-direction: column;
                   width : 350px;
-                  background-color: yellow;
+                  background-color: mistyrose;
                   block;
+                  margin-left: 10px;
+                  margin-right: 25px;
              }
+
+.nogames               {font-size: 20px; text-align: left; font-weight: 400; color: black; padding-left: 5px;}
+
+#left-current-games { margin-top: 15px; max-height: 175px; overflow-y: auto; }
+#left-old-games     { margin-top: 15px; max-height: 450px; overflow-y: auto; }
+#left-joinable      { margin-top: 15px; }
+#left-new-games     { margin-top: 15px; }
+
+#left-current-games th {font-size: 20px; text-align: center; font-weight: 200; color: black; padding-right: 10px; padding-left: 5px;}
+#left-current-games td {font-size: 20px; text-align: center; font-weight: 400; color: black; padding-right: 5px;}
+
+#left-old-games th {font-size: 20px; text-align: center; font-weight: 200; color: black; padding-right: 10px; padding-left: 5px;}
+#left-old-games td {font-size: 20px; text-align: center; font-weight: 400; color: black; padding-right: 5px;}
+
+#left-joinable  th {font-size: 20px; text-align: center; font-weight: 200; color: black; padding-right: 10px; padding-left: 5px;}
+#left-joinable  td {font-size: 20px; text-align: center; font-weight: 400; color: black; padding-right: 5px;}
+
 #mid-mid-page {
                   display : flex;
-                  width : 950px;
-                  background-color: red;
+                  width : 885px;
+                  margin-right: 5px;
               }
 #right-mid-page {
                   display : flex;
-                  width : 500px;
-                  background-color: blue;
+                  width : 518px;
+                  background-color: aliceblue;
                   flex-direction: column;
+                  margin-right: 10px;
+
              }
 
-.header-image {
-                    height: 75px;
-                 }
-#board-table  {
-                 border-collapse: collapse;
+
+
+#action_div    { margin-top: 25px; }
+#letters_div   { margin-top: 25px;  color: blue; font-size: 20px; font-weight: 900; text-align: left; display: float-inline;}
+
+.show_challenge_div { margin-top: 25px; background-color: mistyrose; color: black; font-size: 20px; font-weight: 400; text-align: left; display: flex; flex-direction: column;}
+
+#word_response_div  { margin-top: 25px; background-color: lemonchiffon; color: black; font-size: 20px; font-weight: 400; text-align: left; vertical-align: top; display: flex; flex-direction: column;}
+
+.hide_challenge_div { margin-top: 25px; background-color: olive; display: none;}
+
+#challenge_btn_div {  background-color: mistyrose; display: flex; border: none; }
+#challenge_btn_div table tr td {  border: none; }
+
+#hide_challenge_btn_div { background-color: olive; display: none;}
+.hide_challenge_btn     { display: none;}
+
+#score_div     {  }
+#rack_div      {  }
+#highLightMe   {  }
+
+.first_chall   { color: blue; font-weight: 900;}
+.second_chall  { color: red;  font-weight: 900; font-size: 20 px;}
+
+#player_score_div { display : flex; flex-direction: row; margin-bottom: 25px; }
+
+#player_one_score  { color: indigo;     font-size: 25px; font-weight: 900; text-align: left;   vertical-align: middle; width: 44%;}
+#player_two_score  { color: darkgreen;  font-size: 25px; font-weight: 900; text-align: right;  vertical-align: middle; width: 44%;}
+#game_round        { color: black;      font-size: 25px; font-weight: 900; text-align: center; vertical-align: middle; margin: auto; }
+.player_signed_in  { color: black;      font-size: 25px; font-weight: 400; text-align: left; vertical-align: middle; }
+.player_name       { color: blue;       font-size: 25px; font-weight: 900; text-align: left; vertical-align: middle; }
+
+#play_log_div { margin-top: 25px; color: lightslategrey; font-size: 20px; font-weight: 900; max-height: 450px; overflow-y: auto;
+                text-align: left; display: flex; flex-direction: column;}
+.challenged_pts  { color: blue; }
+
+#letters_div meter { width: 90%; height: 30px;  vertical-align: middle; }
+
+.header-image { height: 75px; }
+#board-table  { border-collapse: collapse; }
+#board-table tr { /*
+                   padding: 0px; border: solid 2px #777; height: 55px; width: 55px; vertical-align: middle; text-align: center; margin: auto;
+                  */
 }
 #board-table td {
-                   padding: 0px; border: solid 2px #777; height: 55px; width: 55px; vertical-align: middle; text-align: center; margin: auto;
+                   padding: 0px; border: solid 2px #777; height: 57px; width: 57px; vertical-align: middle; text-align: center; margin: auto;
 }
 
-#rack {
-                 padding: 0px; height: 55px; width: 55px;
-}
-#rack td {
+#rack { padding: 0px; height: 57px; width: 57px; background-color: burlywood; }
+#rackdd td {
                  padding: 0px; border: solid 2px #777;
 }
-#rack img {
-                 height: 50px; width: 50px; padding: 0px;
+#rack img { height: 55px; width: 55px; padding: 0px; vertical-align: middle; text-align: center; margin: auto;}
+#rack td { position : relative; padding: 0px; border: solid 2px #777;
 }
+
+.rackexchangemarker { position : absolute; color: red; font-size: 20px; font-weight: 900; top:-2px; left:4px; margin: 0px; padding: 0px; }
+
+#unseen { visibility: collapse; }
+
+
+.scored-line    { color: black; font-size: 25px; font-weight: 400; text-align: center; vertical-align: middle; }
+
+#challenge_text { color: black; font-size: 20px; font-weight: 400; text-align: left; }
+
 .triple-word    { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: red; }
 .double-word    { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: deeppink; }
 .triple-letter  { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: blue; }
 .double-letter  { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: deepskyblue; }
 .plain-score    { color: white; font-size: 15px; font-weight: 900; text-align: center; vertical-align: middle; background-color: bisque; }
 .board-image    { height: 55px; width: 55px; padding: 0px; vertical-align: middle; text-align: center; margin: auto; }
-.board-wild-img { height: 45px; width: 45px; padding: 0px; vertical-align: middle; text-align: center; margin: auto; }
-.board-wild-td  { padding: 0px; border: solid 2px #777; height: 55px; width: 55px; background-color: lightgreen; vertical-align: middle; text-align: center; margin: auto;}
+.board-wild-img { height: 55px; width: 55px; padding: 0px; vertical-align: middle; text-align: center; margin: auto; }
+.board-wild-td  { height: 55px; width: 55px; padding: 0px; vertical-align: middle; text-align: center; margin: auto;}
+
+#winner_loser_div { font-size: 30px; text-align: center; font-weight: 900; color: blue; }
+
+.player-one     { vertical-align: middle; background-color: indigo; }
+.player-two     { vertical-align: middle; background-color: darkgreen; }
+.player-unknown { vertical-align: middle; background-color: darkred; }
+.last-play      { vertical-align: middle; background-color: crimson; }
+.retractable    { vertical-align: middle; background-color: yellow; }
+
+.played_word    { font-size: 20px; text-align: right; font-weight: 900; color: crimson; padding-right: 25px;}
+.played_points  { font-size: 20px; text-align: right; font-weight: 400; }
+.played_multiplier { font-size: 20px; text-align: right; font-weight: 400; padding-right: 25px;}
+.played_score   { font-size: 20px; text-align: right; font-weight: 400; padding-right: 25px;}
+.played_comment { font-size: 20px; text-align: left; font-weight: 400; color: crimson; }
 
 .highlight-game  {  background-color: DarkKhaki; }

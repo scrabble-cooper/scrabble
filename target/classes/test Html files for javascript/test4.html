@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head >
+    <title>Test Board Class</title>
+    <link href="../static/game.css" rel="stylesheet">
+    <link href="../static/common.css" rel="stylesheet">
+    <script type="text/javascript" src="jquery-3.6.4.min.js"></script>
+    <script src="../static/board.js"></script>
+    <script src="../static/rack.js"></script>
+    <link rel="icon" type="image/png" src="../static/images/myicon.png">
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Please enable Javascript and reload this page!</h2></noscript>
+
+<div id="mid-page" >
+    <div id="mid-mid-page" >
+        <table id="board-table">
+            <tbody id="board-body"></tbody>
+        </table >
+    </div>
+    <div id="rack_div">
+        <table id="rack">
+            <tr id="rack_tr">
+
+            </tr>
+        </table>
+        <button onclick ="resetRack ()" id="reset-rack_btn" class="btn btn-default" >Retract Letters</button>
+        <button onclick ="checkPlay ()" id="checkplay-btn" class="btn btn-default" >Check Move</button>
+        <button onclick ="scorePlay ()" id="scoreplay-btn" class="btn btn-default" >Score Move</button>
+        <button onclick ="movePlay      ()" id="move-play-btn" class="btn btn-default" >Play</button>
+        <button onclick ="movePass      ()" id="move-pass-btn" class="btn btn-default" >Pass</button>
+        <button onclick ="moveExchange  ()" id="move-exchange-btn" class="btn btn-default" >Exchange</button>
+
+
+        <p id ="clickresult"></p>
+    </div>
+</div>
+
+
+<script>
+
+    let javaScriptOnlyTesting = true;
+
+    let p1_iD = 2;
+    let p2_iD = 22;
+
+    let players_turn_id = 2;
+    let userID          = 2;
+
+    let tScore_p1 = 0;
+    let tScore_p2 = 0;
+
+    if (javaScriptOnlyTesting)
+    {
+    }
+
+    let bNode = document.getElementById('board-body');
+
+    var mainboard     = new board (bNode, 15, 225, scrabbleBk)
+
+    let boardstart="               " +
+                   "               " +
+                   "               " +
+                   "               " +
+                   "               " +
+                   "     R         " +
+                   "     A         " +
+                   "    JAVASCRIPT " +
+                   "         O     " +
+                   "         O     " +
+                   "         P     " +
+                   "         E    T" +
+                   "         ROAMER" +
+                   "             MA" +
+                   "              N" ;
+
+    let playby    ="               " +
+                   "               " +
+                   "               " +
+                   "               " +
+                   "               " +
+                   "     2         " +
+                   "     2         " +
+                   "    2222222222 " +
+                   "         2     " +
+                   "         2     " +
+                   "         2     " +
+                   "         2    2" +
+                   "         222222" +
+                   "             22" +
+                   "              2" ;
+
+
+
+    mainboard.appendBoard(boardstart, blankStart, playby);
+
+    var myRack     = "RE*AINS  ";
+    var myExchange = "         ";
+    displayRack();
+
+</script>
+</body>
+</html>

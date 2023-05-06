@@ -13,16 +13,22 @@ function generateString(length) {
 
 function outputTitle (title,titleId ) { // The function will place a single row table of images spelling the title as child nodes of the node specified by id
 
+   title = title.toUpperCase ();
    const myNode = document.getElementById(titleId);
 
    let tempHTML = "<table><tr><td>";
 
+   tempHTML += "<td><img class=\"title-image\"  src=\"images/CooperUnion.png\"  /></td>"
+   tempHTML += "<td>ECE366 - Spring 2023<br >Software Engineering &<br > Large Systems Design&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";
+
+   tempHTML += "<td>";
+  // tempHTML += "<img class=\"title-image\" src=\"images/clear.png\"  />";
+
    for (let i = 0; i < title.length; i++) {
-       let lcLetter = title[i].toLowerCase ();
        if (title[i] == " ") {
            tempHTML = tempHTML + "<img class=\"title-image\" src=\"images/clear.png\"  />";
        }
-       else { tempHTML = tempHTML + "<img class=\"title-image\" src=\"images/" + lcLetter + ".svg\"  />"; }
+       else { tempHTML = tempHTML + "<img class=\"title-image\" src=\"images/" + title[i] + ".svg\"  />"; }
    }
 
    tempHTML = tempHTML + "</td></tr></table>";
@@ -39,9 +45,9 @@ function createNodeFromHTML (htmlString) {
 
 function displayStartNewGameButton ()
 {
-   let myNode = document.getElementById("left-new-game");
-
-   myNode.innerHTML = "<button onclick =\"sendCreateGame ()\" id=\"creategame\" class=\"btn btn-default\" >New Game</button>";
+  // let myNode = document.getElementById("left-new-game");
+  // going to be renamed to show standings if there is time
+  //myNode.innerHTML = "<button onclick =\"sendCreateGame ()\" id=\"creategame\" class=\"btn btn-default\" >New Game</button>";
 }
 
 
@@ -64,11 +70,23 @@ function showStartNewGameButton ()
 
 
 var stompClient = null;
+var socket      = null;
+
+function lostComms ()
+{
+   console.log('lost comms called.');
+
+   document.body.innerHTML = "<H1><br><br>The Server Closed Communications.<br><br>Go do something constructive!!! In fresh air maybe.</H1>";
+  // Restart from beginning
+//   stompClient.disconnect();
+  // setConnected();
+}
+
 
 function connect() {
     if (stompClient == null) {
 
-        var socket = new SockJS('/gs-guide-websocket');
+        socket = new SockJS('/gs-guide-websocket');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({},
@@ -81,6 +99,12 @@ function connect() {
                 );
             }
         );
+
+        socket.onclose = function() {
+            console.log('close');
+            lostComms ();
+        };
+
     }
 }
 
@@ -108,7 +132,7 @@ function requestJoinableGames() {
 }
 
 function sendJoinGame (game_id) {
-    stompClient.send("/app/joingame", {}, JSON.stringify({'user_id': userID, 'gameID': game_id,'txName':termID}));
+    stompClient.send("/app/joingame", {}, JSON.stringify({'user_id': userID, 'username': userName, 'gameID': game_id,'txName':termID}));
 }
 
 
@@ -118,15 +142,18 @@ function sendName() {
 }
 
 function sendCreateGame () {
-    stompClient.send("/app/creategame", {}, JSON.stringify({'userid': userID,'txName':termID }));
+    stompClient.send("/app/creategame", {}, JSON.stringify({'userid': userID,'username': userName,'txName':termID }));
 }
 
 function sendRefreshOpponnent (opponentID) {
-    stompClient.send("/app/refreshopponnent", {}, JSON.stringify({'opponenetid': opponentID,'txName':termID }));
+    stompClient.send("/app/refreshopponnent", {}, JSON.stringify({'opponentid': opponentID,'txName':termID }));
 }
 
+
 function sendRegistration() {
-    //connect ();
+
+
+
     stompClient.send("/app/register", {},
                      JSON.stringify({'regname': $("#regname").val(),
                                      'regpassword1': $("#regpassword1").val(),
@@ -144,125 +171,908 @@ function requestGameInfo (gameID)
 
 }
 
+
 function showResponse(message) {
     const obj = JSON.parse(message);
+
+    console.log (obj);
+
+    consoleOutLetterCount ("showResponse-begin");
+
 
     if (obj.txName == (termID))
     {
         // response is for this client it for this
-        $("#response").innerHTML = "";
+       // $("#response").innerHTML = "";
         const responseNode = document.getElementById("response");
-        responseNode.appendChild (document.createTextNode(message));
+        responseNode.innerHTML = "";
+        //responseNode.appendChild (document.createTextNode(message));
+        if (obj.txData == "register") {
+            if (obj.result == "true") {
+               userName = $("#regname").val();
+               resetElementByID("theForm");
+               myRack = "         ";
+               myRack = " WELCOME ";
+               clearRack  ();
+               displayRack();
+               displayUserStatus ();
+               //disconnect ();
+              // window.location.replace("/gamePage.html?Player=" + username );
+            }
+            else {  responseNode.innerHTML = obj.response; }
+        } else
+        if (obj.txData == "signin") {
+            if (obj.result == "true") {
+               userName = $("#name").val();
+               resetElementByID("theForm");
+               myRack = "         ";
+               myRack = " WELCOME ";
+               clearRack  ();
+               displayRack();
+               displayUserStatus ();
 
-        if ((obj.txData == "register") && (obj.result == "true")) {
-           userName = $("#regname").val();
-           resetElementByID("theForm");
-           myRack = "         ";
-           myRack = " WELCOME ";
-           clearRack  ();
-           displayRack();
-           displayUserStatus ();
-           //disconnect ();
-          // window.location.replace("/gamePage.html?Player=" + username );
+               //disconnect ();
+               //  window.location.replace("/gamePage.html?Player=" + username);
+            }
+            else {  responseNode.innerHTML = obj.response; }
+        } else
+        if (obj.txData == "reqplayersstatus")
+        {
+           userID = obj.userId;
+           const objArr = obj.gamesInfo;
+           let currentNumberOfGames = objArr.length;
+
+           displayStartNewGameButton (); // Allows player to create a new game which others players can join. when they join the game starts
+           displayCurrentGames (objArr,currentNumberOfGames); // show unfinished games only
+           requestJoinableGames();
+           displayCurrentGames (objArr,currentNumberOfGames, true); // show finished games
+
+        } else
+        if (obj.txData == "creategame")
+        {
+          requestStatus();
+        } else
+        if (obj.txData == "joingame")
+        {
+           clearWordQueryResponse ();
+           if (obj.opponent_id == 0) {
+              // someone joined the game before us :(
+              currentGameID = -1;
+              responseNode.innerHTML = "Too slow. Someone else joined the Game!!";
+
+           }
+           else {
+             currentGameID   = obj.game_id;
+             requestGameInfo (currentGameID);
+           }
+        } else
+        if (obj.txData == "joinables")
+        {
+           const objArr = obj.gamesInfo;
+           let currentJoinableGames = objArr.length;
+
+           if (currentJoinableGames == 0)
+           {
+              displayNoJoinableGames ();
+           }
+           else { displayJoinableGames (objArr,currentJoinableGames); }
         }
-        else if ((obj.txData == "signin") && (obj.result == "true")) {
-           userName = $("#name").val();
-           resetElementByID("theForm");
-           myRack = "         ";
-           myRack = " WELCOME ";
-           clearRack  ();
-           displayRack();
-           displayUserStatus ();
-
-           //disconnect ();
-           //  window.location.replace("/gamePage.html?Player=" + username);
-        }
-        else {
-           if (obj.txData == "reqplayersstatus")
+        else
+        {
+           // this else down processes the right hand side of the scrabble web page
+           if (obj.txData == "wordquery")
            {
-              userID = obj.userId;
-              const objArr = obj.gamesInfo;
-              let currentNumberOfGames = objArr.length;
+              if (displayWordQueryResponse (obj.dictionary_response,obj.dictionary_response.length)) {
+                  // Challenge was unsuccessful
+                  appendToPlayLog ("chun");
 
-              if (currentNumberOfGames == 0)
-              {
-                 // allow create new game
-                 displayStartNewGameButton ();
-              }
-              else
-              {
-                 displayCurrentGames (objArr,currentNumberOfGames);
-              }
-              requestJoinableGames();
+                  if (currentGame.challengecount >= 1) {
+                     makeLastMovePermanent (true); // they lost the second challenge switch back to other player
+                  }
+                  else {
+                     makeLastMovePermanent (); // they lost first challenge
+                  }
+               }
+               else {
+                   appendToPlayLog ("chok");
+                   unMakeLastMove ();
+               }
            }
-
-           if (obj.txData == "creategame")
-           {
-              requestStatus();
-           }
-
-           if (obj.txData == "joingame")
-           {
-              if (obj.opponnetId > 0)
-              {
-                 currentGameID   = obj.gameID;
-                 requestGameInfo (currentGameID);
-                 sendRefreshOpponnent (obj.opponentId);
-              }
-           }
-
-           if (obj.txData == "joinables")
-           {
-              const objArr = obj.gamesInfo;
-              let currentJoinableGames = objArr.length;
-
-              if (currentJoinableGames == 0)
-              {
-                 displayNoJoinableGames ();
-              }
-              else { displayJoinableGames (objArr,currentJoinableGames); }
-           }
-
            if (obj.txData == "requestgameinfo")
            {
               if ((currentGameID <= 0) || ((currentGameID == obj.game_id)))
               {
-                 boardStr = obj.board;
-                 displayBoard(boardStr);
-                 if (obj.p1_iD == userID)
-                 {
-                    myRack   = obj.p1_hand;
+                 currentGame = obj;
+                 myExchange  = "         ";
 
-                 }
-                 else {
-                    myRack   = obj.p2_hand;
-                 }
+                 consoleOutLetterCount ("showResponse-requestgameinfo");
+
+                 currentGameID = obj.game_id;
+
+                 if (obj.p1_iD == userID) { myRack   = obj.p1_hand; } else { myRack   = obj.p2_hand; }
                  while (myRack.length < 9) myRack += " ";
 
                  clearRack();
                  displayRack ();
 
-                 if (obj.players_turn_id == userID) { displayActionButtons (); }
+                 currentGame.GameBoard = new board (bNode, 15, 225, scrabbleBk);
 
+                 currentGame.GameBoard.appendBoard (obj.board, obj.lastplay, obj.playedby); // this is the setter
+                                                                                            //there is no such thing as GameBoard.lastplay it i private same for played by and board getters and setters
               }
            }
+
+           updatePlayersView ();
         }
     }
-    else if ((obj.txData == "refreshopponnent") && (obj.txName == userID)) { requestStatus (); }
+    else
+    {
+       if (obj.game_id == currentGameID) {
+           switch(obj.txData) {
+              case "lastmovemakepermanent":
+                         requestGameInfo (currentGameID);
+                         break;
+              case "unmakelastmove":
+                         requestGameInfo (currentGameID);
+                         break;
+
+              case "moveplay":
+                         requestGameInfo (currentGameID);
+                         break;
+              case "movepass":
+                         requestGameInfo (currentGameID);
+                         break;
+              case "moveexchange":
+                         requestGameInfo (currentGameID);
+                         break;
+              case "wordquery":
+                         displayWordQueryResponse (obj.dictionary_response,obj.dictionary_response.length);
+                         break;
+              default:
+          }
+       }
+       else if (currentGameID == -1) {
+          // I am idle not looking at another game and someone joined one of my open games switch to that game
+          if ((myListOfGameIDs.indexOf(obj.game_id) != -1 ) && (obj.txData == "joingame"))
+          {
+             console.log (obj.opponent_id + " " + userID);
+             currentGameID = obj.game_id;
+             requestGameInfo (obj.game_id);
+          }
+
+
+       }
+       else {
+          if ((obj.txData == "signin") && ( userName != "") && (obj.user_name == userName))
+          {
+             // The same user has signed in again so log them out this instance instantly!!!
+             logoutUser ();
+          }
+       }
+    }
 }
 
-function displayActionButtons ()
+function unMakeLastMove ()
 {
-   let myNode = document.getElementById("action_tr");
+    // Change the challenged players hand back ie add back last played letters
 
-  // myNode.innerHTML = "<h2>Challenge - Pass - Exchange - Play</h2>";
+    if (currentGame.players_turn_id == currentGame.p1_iD) {
+        currentGame.p2_hand = currentGame.p2_hand.replaceAll (" ","") + " ";
+        currentGame.p2_hand += currentGame.GameBoard.clearAndReturnLastPlayed ();
+    }
+    else {
+        currentGame.p1_hand = currentGame.p1_hand.replaceAll (" ","") + " ";
+        currentGame.p1_hand += currentGame.GameBoard.clearAndReturnLastPlayed ();
+    } ;
+
+   // if challenge count == 1 i.e. two failed challenges reset opponents move and they skip their turn
+   // if challenge count == 0 i.e. one failed challenges reset opponents move and they go again
+
+   if (currentGame.challengecount == 0) {
+      if (currentGame.players_turn_id == currentGame.p1_iD) {
+          currentGame.players_turn_id = currentGame.p2_iD;
+      }
+      else currentGame.players_turn_id = currentGame.p1_iD;
+      currentGame.challengecount += 1;
+   } else {
+      currentGame.current_round += 1;
+      currentGame.challengecount = 0;
+   }
+
+   updatePlayersView ();
+
+   stompClient.send("/app/unmakelastmove", {},        // in response to a successful chalenge
+       JSON.stringify({'game_id'         : currentGameID,
+                       'user_id'         : userID,
+
+                       'p1_hand'         : currentGame.p1_hand,
+                       'p2_hand'         : currentGame.p2_hand,
+
+                       'current_round'   : currentGame.current_round,
+                       'challengecount'  : currentGame.challengecount,
+
+                       'players_turn_id' : currentGame.players_turn_id,
+                       'playlog'         : currentGame.playlog,
+                       'lastplay'        : currentGame.GameBoard.getLastPlay(),
+                       'txName'          : termID}
+      ));
+
+
+}
+
+function appendToPlayLog (theMove,arg1,arg2)     // play ltrs off , pass, exch #, noch, chok, chun, resg
+{
+   switch (theMove) {
+
+      case "play":  // play, the letters played and the offset of the board for the first letter
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  + ", " + arg1  + ", " + arg2 ;
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "pass":  // pass
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  +  ", " + " " +  ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+
+         break;
+
+      case "exch":  // exchanged count number of letters exchanged
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  + ", " + arg1 + ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "noch":  // noch
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove + ", +" + currentGame.GameBoard.retrieveMovePoints ();
+         currentGame.playlog += ", " + " " +  ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "chok":  // challenge ok succeeded
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  +  ", " + " " +  ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "chun":  // challenged unsuccesful failed
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  + ", +" + currentGame.GameBoard.retrieveMovePoints ();
+         currentGame.playlog +=  ", " + " " +  ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "resg":  // gave up already failed
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  +  ", " + " " +  ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+   }
+}
+
+function accept ()
+{
+   clearWordQueryResponse (); // if any
+   appendToPlayLog ("noch");
+   makeLastMovePermanent ();
+}
+
+function updatePlayersView ()
+{
+    if (currentGameID != -1)
+    {
+        if (currentGame.p1_iD == userID) {
+           myRack   = currentGame.p1_hand;
+        } else {
+           myRack   = currentGame.p2_hand;
+        }
+
+        while (myRack.length < 9) myRack += " ";
+
+        myExchange = "         ";
+        clearRack();
+        displayRack ();
+
+        currentGame.GameBoard.appendBoard ();
+
+        consoleOutLetterCount ("updatePlayersView");
+
+        if (currentGame.winner == 0)
+        {
+            showPlayerScores ();
+
+            if ((currentGameID != 0) && (currentGame.GameBoard.getLastPlay () != blankStart))
+            {
+               let score = currentGame.GameBoard.scorePlayedLetters ();
+
+               showChallengeDiv (currentGame.GameBoard.retrieveNewWords());
+            }
+            else hideChallengeDiv ();
+
+            showNumberOfBagLetters ();
+
+            showPlayLog (6);
+
+            if ((currentGameID != 0) && (currentGame.GameBoard.getLastPlay () == blankStart) && (currentGame.players_turn_id == userID)) {
+               enableActionButtons ();
+            }
+            else  disableActionButtons ();
+        }
+        else {
+            showPlayerScores ();
+            showPlayLog (200); // basically show the whole log
+            hideChallengeDiv ();
+            disableActionButtons ();
+        }
+    }
+}
+
+function makeLastMovePermanent (changeTurn = false)
+{
+   let player_number = 1;
+   if (currentGame.players_turn_id == currentGame.p1_iD) {
+      // it is player ones turn so the last move was by player 2
+      player_number = 2;
+   }
+   consoleOutLetterCount ("MakeLastMovePermanent 11111 ");
+
+   let lettersPlayed = currentGame.GameBoard.updateBoardWithLastPlayed (player_number);
+
+   if (player_number == 2) {
+      currentGame.p2_score += currentGame.GameBoard.retrieveMovePoints ();
+
+      currentGame.p2_hand = currentGame.p2_hand.replaceAll(" ", '');
+
+      consoleOutLetterCount ("MakeLastMovePermanent 22222 " + currentGame.p2_hand + " " + lettersPlayed);
+
+      currentGame.p2_hand += dealLetters (7 - currentGame.p2_hand.length);
+
+      // check for a winner
+      // winner field -- always with respect to p1  0 : incomplete  1 : wins   2 : lost  3 : draw  4 : abandon
+
+      if (currentGame.p2_hand.replaceAll (" ", "").length == 0) {
+
+          // p2 finished
+
+          let pIL = pointsInLetters (currentGame.p1_hand);
+          // alter scores ie p2 gets points from other players hand
+          // and they lose those points
+
+          currentGame.p2_score += pIL;
+          currentGame.p1_score -= pIL;
+
+          if (currentGame.p1_score > currentGame.p2_score) {
+             currentGame.winner = 1;
+          }
+          else if (currentGame.p1_score == currentGame.p2_score) {
+             currentGame.winner = 3;
+          } else currentGame.winner = 2;
+      }
+
+   }
+   else {
+      currentGame.p1_score += currentGame.GameBoard.retrieveMovePoints ();
+
+      currentGame.p1_hand = currentGame.p1_hand.replaceAll(" ", '');
+
+      consoleOutLetterCount ("MakeLastMovePermanent 33333 " + currentGame.p1_hand + " " + lettersPlayed);
+
+      currentGame.p1_hand += dealLetters (7 - currentGame.p1_hand.length);
+
+      if (currentGame.p1_hand.replaceAll (" ", "").length == 0) {
+
+          // p1 finished
+
+          currentGame.winner = 1;
+          let pIL = pointsInLetters (currentGame.p2_hand);
+          // alter scores ie p1 gets points from other players hand
+          // and they lose those points
+
+          currentGame.p1_score += pIL;
+          currentGame.p2_score -= pIL;
+
+          if (currentGame.p1_score > currentGame.p2_score) {
+             currentGame.winner = 1;
+          }
+          else if (currentGame.p1_score == currentGame.p2_score) {
+             currentGame.winner = 3;
+          } else currentGame.winner = 2;
+      }
+    }
+
+   if (changeTurn == true) {
+      // Basically your 2nd challenge failed
+      console.log ("Update Last Moved played but switch players turn id ");
+      if (currentGame.players_turn_id == currentGame.p1_iD) { currentGame.players_turn_id = currentGame.p2_iD; } else { currentGame.players_turn_id = currentGame.p1_iD; }
+   }
+
+   consoleOutLetterCount ("MakeLastMovePermanent");
+
+   currentGame.current_round += 1;
+   currentGame.passcount      = 0;
+   currentGame.challengecount = 0;
+
+   updatePlayersView ();
+
+   stompClient.send("/app/lastmovemakepermanent", {},
+       JSON.stringify({'game_id'         : currentGameID,
+                       'user_id'         : userID,
+                       'p1_score'        : currentGame.p1_score,
+                       'p2_score'        : currentGame.p2_score,
+
+                       'p1_hand'         : currentGame.p1_hand,
+                       'p2_hand'         : currentGame.p2_hand,
+
+                       'current_round'   : currentGame.current_round,
+                       'passcount'       : currentGame.passcount,
+                       'challengecount'  : currentGame.challengecount,
+
+                       'letters_left'    : currentGame.letters_left,
+                       'winner'          : currentGame.winner,
+
+                       'players_turn_id' : currentGame.players_turn_id,
+                       'board'           : currentGame.GameBoard.getTheWords(),
+                       'playedby'        : currentGame.GameBoard.getPlayedBy(),
+                       'lastplay'        : currentGame.GameBoard.getLastPlay(),
+                       'playlog'         : currentGame.playlog,
+                       'txName'          : termID}
+      ));
+}
+
+function dealLetters (dealNLetters)
+{
+    let result = "";
+    let letterBag = currentGame.letters_left;
+
+    console.log ("DL Start " + dealNLetters + " " + currentGame.letters_left.length);
+
+    while ((currentGame.letters_left.length > 0) && (dealNLetters > 0))
+    {
+        let i = Math.floor(Math.random() * currentGame.letters_left.length);
+
+        console.log ("DL Mid " + i);
+
+        result += currentGame.letters_left[i];
+
+        if (i == 0)
+        {
+            letterBag = currentGame.letters_left.substring (1);
+        }
+        else letterBag = currentGame.letters_left.substring (0,i) + currentGame.letters_left.substring (i+1);
+
+        currentGame.letters_left = letterBag;
+
+        dealNLetters--;
+    }
+
+    console.log ("DL ENd " + result.length + " " + currentGame.letters_left.length);
+
+    return result;
+}
+
+function countOfNonSpaceLetters (aStr)
+{
+   let tempStr = aStr.replaceAll (" ", "");
+
+   return tempStr.length;
+}
+
+function consoleOutLetterCount (markStr)
+{
+   if ((currentGame !== null) && (typeof currentGame.GameBoard !== "undefined"))
+   {
+       let tempWC = currentGame.letters_left.length + countOfNonSpaceLetters (currentGame.p1_hand) + countOfNonSpaceLetters (currentGame.p2_hand)
+            + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay()) + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
+
+        let tempStr =  " r1 " + countOfNonSpaceLetters (currentGame.p1_hand);
+            tempStr += " r2 " + countOfNonSpaceLetters (currentGame.p2_hand);
+            tempStr += " lp " + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay());
+            tempStr += " mb " + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
+            tempStr += " mb " + currentGame.letters_left.length;
+            tempStr += " 100 == " + tempWC;
+            tempStr += " pc " + currentGame.passcount;
+            tempStr += " cc " + currentGame.challengecount;
+
+       console.log (markStr + tempStr);
+   }
+}
+
+
+function showPlayLog (nLines=5)
+{
+   let myNode = document.getElementById("play_log_table");
+
+   let lines = currentGame.playlog.split('\n');
+
+   console.log(lines[lines.length - 2]);
+
+   let tempTable  = "";
+   let tempOffset = lines.length - 2;
+   let i = 0;
+
+   while ((tempOffset >= 0) && (i < nLines))
+   {
+      let row =   lines[tempOffset].split (",");
+
+      tempTable  += "<tr><td>";
+      tempTable  += row [0]; // round
+      tempTable  += "</td><td>";
+      tempTable  += row [1]; // user
+      tempTable  += "</td><td>";
+      tempTable  += row [2]; // move
+      tempTable  += "</td>";
+
+      if ((row [2] == " noch") || (row [2] == " chun")) {
+         tempTable  += "<td class=\"challenged_pts\">";
+         tempTable  += row [3]; // points scored due to no challenge or unsuccessful challenge
+         tempTable  += "</td>";
+      }
+      else {
+         tempTable  += "<td>";
+         tempTable  += row [3]; // number of letters or letters played
+         tempTable  += "</td>";
+      }
+
+
+      if (row [4].replaceAll (" ",'') != "")
+      {
+      // onmouseover="highlight(this);" onmouseout="unhighlight(this)">
+         tempTable += "<td><span onmouseover=\"highlight(" + row [4] + ");\" onmouseout=\"unhighlight(" + row [4] + ");\">" + row [4];
+         tempTable += "</span></td>";
+      }
+      else {
+         tempTable  += "<td>";
+         tempTable  += row [4];
+         tempTable  += "</td>";
+      }
+      tempTable  += "<td>";
+      tempTable  += row [5]; // p1_score
+      tempTable  += "</td>";
+      tempTable  += "<td>";
+      tempTable  += row [6]; // p2_score
+      tempTable  += "</td>";
+
+
+      tempOffset--;
+      i++;
+      tempTable  += "</tr>";
+
+   }
+   myNode.innerHTML =  tempTable;
+}
+
+var savedStyle ;
+
+function highlight(value)
+{
+   let element = document.getElementById('board_td_' + value);
+
+   if (window.getComputedStyle) {
+       savedStyle = window.getComputedStyle(element);
+   } else {
+       savedStyle = element.currentStyle;
+   }
+
+   element.style.backgroundColor = "orange";
+   element.style.border = "thick dashed orange";
+   console.log(value);
+}
+
+function unhighlight(value)
+{
+   let element = document.getElementById('board_td_' + value);
+   element.style = savedStyle
+
+   console.log(value);
+}
+
+$(".highLightMe").mouseover(function () {
+       console.log($(this).val());
+});
+
+
+function showNumberOfBagLetters ()
+{
+   let myNode = document.getElementById("letters_div");
+
+   //DO NOT REMOVE VERY USEFUL FOR DEBUGGING WEIRD HAPPENINGS
+   //debug remove before publishing.
+   /*
+   let tempWC = currentGame.letters_left.length + countOfNonSpaceLetters (currentGame.p1_hand) + countOfNonSpaceLetters (currentGame.p2_hand)
+       + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay()) + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
+
+   let tempStr =  " r1 " + countOfNonSpaceLetters (currentGame.p1_hand);
+       tempStr += " r2 " + countOfNonSpaceLetters (currentGame.p2_hand);
+       tempStr += " lp " + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay());
+       tempStr += " mb " + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
+       tempStr += " 100 == " + tempWC;
+       tempStr += " pc " + currentGame.passcount;
+       tempStr += " cc " + currentGame.challengecount;
+   */
+   let passStr = "";
+
+   if (currentGame.passcount == 1) passStr = "First Pass. Three consecutive passes and the game is a draw.";
+
+   if (currentGame.passcount == 2) passStr = "Second Pass. Three consecutive passes and the game is a draw.";
+
+   myNode.innerHTML =  "<span title=\"Number of letters left to be dealt.\">" + currentGame.letters_left.length + " <meter  id=\"letters_dealt\" value=\"" + currentGame.letters_left.length +
+                       "\" min=\"0\" max=\"100\"></meter></span><br>" + passStr;
+
+
+}
+
+function showPlayerScores ()
+{
+   let myNode = document.getElementById("player_one_score");
+
+   let temp = "";
+
+   if (currentGame.players_turn_id == currentGame.p1_iD) {
+      temp = " ⏪";
+   } else temp = "";
+
+   myNode.innerHTML =  currentGame.p1_username + "&nbsp;&nbsp;" + currentGame.p1_score + temp;
+
+   myNode = document.getElementById("game_round");
+   myNode.innerHTML = currentGameID  + "." + currentGame.current_round ;
+
+   if (currentGame.players_turn_id == currentGame.p2_iD) {
+      temp = "⏩ ";
+   } else temp = "";
+
+   myNode = document.getElementById("player_two_score");
+
+   myNode.innerHTML = temp + currentGame.p2_score + "&nbsp;&nbsp;" + currentGame.p2_username ;
+
+   myNode = document.getElementById("winner_loser_div");
+
+   switch(currentGame.winner) {
+      case 1:
+                myNode.innerHTML = "GAME OVER " + currentGame.p1_username  + " is the WINNER";
+                break;
+      case 2:
+                myNode.innerHTML = "GAME OVER " + currentGame.p2_username  + " is the WINNER";
+                break;
+      case 3:
+                myNode.innerHTML = "GAME OVER. Its a DRAW";
+                break;
+      default:
+                myNode.innerHTML = "";
+   }
+
+}
+
+function clearWordQueryResponse ()
+{
+   let myNode = document.getElementById("word_response_table");
+   myNode.innerHTML = "";
+}
+
+function displayWordQueryResponse (response,count )
+{
+   result = true; // challenged failed words are all good
+   let myNode = document.getElementById("word_response_table");
+
+   if (count > 0)
+   {
+      let tempStr = "";
+      for (let i = 0; i < count; i++ )
+      {
+         let row = response [i];
+
+         tempStr += "<tr><td class=\"played_word\">";
+         tempStr += row ['word'];
+         tempStr += "<td class=\"played_comment\">";
+         tempStr +=  row ['definition'];
+         tempStr += "</td></tr>";
+
+         if (row ['definition'] == "Oops!. Not in Dictionary.") result = false; // The challenge was successful
+      }
+      myNode.innerHTML = tempStr;
+   }
+   else myNode.innerHTML = "";
+   return result;
+}
+
+
+function refreshCurrent ()
+{
+ if (currentGame.game_id >=0) {
+     currentGame.GameBoard.appendBoard ();
+
+  }
+}
+function moveExchange ()
+{
+   clearWordQueryResponse ();
+
+   if (myExchange == "         ") {
+       alert ("Double click on the letters you want to exchange first!!!!!.")
+   }
+   else
+   {
+      let tempHand  = "";
+      let forTheBag = ""; // the letters to be returned to the bag
+
+
+      for (let i = 0; i < 9; i++)  {
+         if ((myExchange [i] == " ") && (myRack [i] != " ")) tempHand += myRack [i];
+         if  (myExchange [i] != " ") forTheBag += myRack [i];
+      }
+
+      if (currentGame.players_turn_id == currentGame.p1_iD) {
+         currentGame.p1_hand = tempHand + dealLetters (7 - tempHand.length);
+         currentGame.players_turn_id = currentGame.p2_iD;
+      }
+      else {
+         currentGame.p2_hand = tempHand + dealLetters (7 - tempHand.length);
+         currentGame.players_turn_id = currentGame.p1_iD;
+      }
+
+      consoleOutLetterCount ("MoveExchange");
+
+      currentGame.letters_left += forTheBag ;
+
+      appendToPlayLog ("exch",(7 - tempHand.length));
+
+      currentGame.current_round++;
+
+      stompClient.send("/app/moveexchange", {},
+           JSON.stringify({'game_id'         : currentGameID,
+                           'user_id'         : userID,
+                           'current_round'   : currentGame.current_round,
+                           'p1_hand'         : currentGame.p1_hand,
+                           'p2_hand'         : currentGame.p2_hand,
+                           'letters_left'    : currentGame.letters_left,
+                           'players_turn_id' : currentGame.players_turn_id,
+                           'playlog'         : currentGame.playlog,
+                           'txName'          : termID}
+       ));
+
+       updatePlayersView ();
+
+
+
+   }
+}
+
+function moveResign ()
+{
+    clearWordQueryResponse ();
+
+    let   tempReply = prompt ("RESIGN!!! Are you really sure? What would your mother think? type Y to confirm.", "NO");
+
+    if ((tempReply.toUpperCase () == "Y") || (tempReply.toUpperCase () == "YES"))
+    {
+        resetRack ();
+
+        if (currentGame.players_turn_id == currentGame.p1_iD) {
+           currentGame.winner = 2;
+        }
+        else currentGame.winner = 1;
+
+        appendToPlayLog ('resg');
+
+        stompClient.send("/app/movepass", {},
+          JSON.stringify({'game_id'         : currentGameID,
+                          'user_id'         : userID,
+                          'current_round'   : currentGame.current_round,
+                          'players_turn_id' : currentGame.players_turn_id,
+                          'winner'          : currentGame.winner,
+                          'passcount'       : currentGame.passcount,
+                          'playlog'         : currentGame.playlog,
+                          'txName'          : termID}
+      ));
+
+      updatePlayersView ();
+    }
+}
+
+
+function movePass ()
+{
+    clearWordQueryResponse ();
+
+    let   tempReply = prompt ("PASS!!! Are you really sure? type Y to confirm.", "NO");
+
+    if ((tempReply.toUpperCase () == "Y") || (tempReply.toUpperCase () == "YES"))
+    {
+        resetRack ();
+
+        if (currentGame.players_turn_id == currentGame.p1_iD) { currentGame.players_turn_id = currentGame.p2_iD; }
+        else { currentGame.players_turn_id = currentGame.p1_iD;  }
+
+
+        appendToPlayLog ("pass");
+
+
+        currentGame.current_round = currentGame.current_round + 1;
+        currentGame.passcount = currentGame.passcount + 1;
+
+        if (currentGame.passcount == 3) currentGame.winner = 3; // Three passes in a row and it is a draw.
+
+
+
+        stompClient.send("/app/movepass", {},
+          JSON.stringify({'game_id'         : currentGameID,
+                          'user_id'         : userID,
+                          'current_round'   : currentGame.current_round,
+                          'players_turn_id' : currentGame.players_turn_id,
+                          'winner'          : currentGame.winner,
+                          'passcount'       : currentGame.passcount,
+                          'playlog'         : currentGame.playlog,
+                          'txName'          : termID}
+      ));
+
+      updatePlayersView ();
+    }
+ }
+
+function hideChallengeButtons ()
+{
+   $("#challenge_btn_div :button").attr("disabled", true); // wow so this is JQuery
+}
+
+
+function showChallengeButtons ()
+{
+   $("#challenge_btn_div :button").attr("disabled", false); // wow so this is JQuery
+   disableActionButtons ();
+}
+
+function showChallengeDiv (words) {
+
+   let myNode = document.getElementById("challenge_div");
+   myNode.setAttribute ("class", "show_challenge_div");
+
+   myNode = document.getElementById("score_tbody");
+   myNode.innerHTML = words;
+
+   myNode = document.getElementById("challenge_text");
+   if (currentGame.challengecount == 0) {
+       myNode.innerHTML = "<span class=\"first_chall\">&nbsp;First Challenge</span>";
+   } else myNode.innerHTML = "<span class=\"second_chall\">&nbsp;SECOND CHALLENGE</span>";
+
+   if (currentGame.players_turn_id == userID) {
+      showChallengeButtons ();
+   }
+   else {
+      hideChallengeButtons ();
+   }
+}
+
+function hideChallengeDiv () {
+   let myNode = document.getElementById("challenge_div");
+   myNode.setAttribute ("class", "hide_challenge_div");
+
+}
+
+function sendwordQuery(wordList) {
+    //connect ();
+
+    stompClient.send("/app/wordquery", {},
+                     JSON.stringify({'game_id'        : currentGameID,
+                                     'user_id'        : userID,
+                                     'wordlist'       : wordList,
+                                     'txName':termID}
+                         ));
+}
+
+
+function challenge ()
+{
+   let wordList = currentGame.GameBoard.retrieveListOfNewWords ();
+
+   if (wordList != "") sendwordQuery (wordList);
+}
+
+function enableActionButtons ()
+{
+   $("#action_div :input").attr("disabled", false); // wow so this is JQuery
+}
+
+function disableActionButtons ()
+{
+   $("#action_div :input").attr("disabled", true); // wow so this is JQuery
 }
 
 function displayNoJoinableGames ()
 {
    let myNode = document.getElementById("left-joinable");
 
-   myNode.innerHTML = "<h2>No Joinable Games</h2>";
+   myNode.innerHTML = "<span class=\"nogames\">No Joinable Games</span>";
 }
 
 function displayJoinableGames (objArr,count)
@@ -275,12 +1085,79 @@ function displayJoinableGames (objArr,count)
     for (let ii = 0; ii < count; ii++ ) {
         let row = objArr[ii];
         console.log (row);
-        if ((row[0] > 0) && (row[2] < 1)) {
-           subhtml += "<tr><td><button onclick =\"sendJoinGame (" + row['game_id'] + ")\" id=\"sendJoinGame\" class=\"btn btn-default\" >Join Game " + row['game_id'] + "</button></td></tr>";
+        if (row['game_id'] > 0) {
+           subhtml += "<tr><td>" + row['game_id'] + "</td>";
+           subhtml += "<td>" + row['opponent_name'] + "</td>";
+           subhtml += "<td><button onclick =\"sendJoinGame (" + row['game_id'] + ")\" id=\"sendJoinGame\" class=\"btn btn-default\" >Join</button></td></tr>";
         }
     }
 
-    myNode.innerHTML = "<h2>Available Games To Join</h2><table>" + subhtml + "</table>";
+    myNode.innerHTML = "<table><tr><th>Game</th><th>Opponent</th><td></th></tr>" + subhtml + "</table>";
+}
+
+function movePlay  ()
+{
+    consoleOutLetterCount ("moveplay-begin");
+
+    clearWordQueryResponse ();
+
+    consoleOutLetterCount ("moveplay-begin");
+
+    // The currentGame  object contains
+    // game_id  p1_iD p2_iD p1_username p2_username p1_score p2_score letters_left current_round p1_hand p2_hand winner board players_turn_id
+    // lastplay playedby challengecount passcount
+
+    if (currentGame.GameBoard.countRetractableLetters () == 0) {
+            alert ("That looks like a PASS to me. Place some letters on the board!!!!");
+    }
+    else
+    {
+       consoleOutLetterCount ("moveplay-2");
+
+        if (checkPlay () == false) {
+            alert ("That move does not look good. You need to fix it!!!!");
+        }
+        else {
+            if (currentGame.players_turn_id == currentGame.p1_iD) {
+               currentGame.players_turn_id = currentGame.p2_iD;
+
+               //currentGame.p1_hand = "";
+               //for (let i = 0; i < 9; i++ ) if (myRack [i] != " ") currentGame.p1_hand += myRack [i] ;
+               currentGame.p1_hand = myRack
+               consoleOutLetterCount ("moveplay-3");
+            }
+            else {
+               currentGame.players_turn_id = currentGame.p1_iD;
+               //currentGame.p2_hand = "";
+               //for (let i = 0; i < 9; i++ ) if (myRack [i] != " ") currentGame.p2_hand += myRack [i] ;
+               currentGame.p2_hand = myRack
+               consoleOutLetterCount ("moveplay-4");
+            }
+
+            consoleOutLetterCount ("moveplay-5");
+
+            tempLastPlay = currentGame.GameBoard.playRetractableLetters ();
+
+            let offset = tempLastPlay.search(/\S/);
+
+            appendToPlayLog ("play",tempLastPlay.replaceAll (" ", ''), offset);
+
+            stompClient.send("/app/moveplay", {},
+                    JSON.stringify({'game_id'  : currentGameID,
+                                    'user_id'  : userID,
+                                    'txName'   : termID,
+                                    'challengecount' : currentGame.challengecount,
+                                    'p1_hand'  : currentGame.p1_hand,
+                                    'p2_hand'  : currentGame.p2_hand,
+                                    'players_turn_id' : currentGame.players_turn_id,
+                                    'playlog'  : currentGame.playlog,
+                                    'lastplay' : tempLastPlay}));
+
+            updatePlayersView ();
+        }
+        consoleOutLetterCount ("moveplay-end");
+
+    }
 }
 
 function setAndShowCurrentGame (gameId)
@@ -291,44 +1168,82 @@ function setAndShowCurrentGame (gameId)
    }
 }
 
-function displayCurrentGames (objArr,count)
+function displayCurrentGames (objArr,count,finished = false) // only show finished or current games
 {
     let myNode = document.getElementById("left-current-games");
-    myNode.innerHTML = "";
 
-    let currentGameshtml = "";
+    if (finished == true) myNode = document.getElementById("left-old-games");
+
+    myListOfGameIDs = [];
+
+    let countofRowstoDisplay = 0;
+
+    let currentGameshtml = "<tr><th>Current</th><th>Opponent</th><th>Turn</th><th></th></tr>";
+
+    if (finished == true)
+    {
+       currentGameshtml = "<tr><th>Ended</th><th>Opponent</th><th><span class=\"player_name\">" + userName + "</span></th><th></th></tr>";
+    }
+
+    //currentGameshtml = "<tr><th>Current</th><th>Opponent</th><th>Turn</th><th></th></tr>";
 
     for (let ii = 0; ii < count; ii++ ) {
         let row = objArr[ii];
+        let tempOp = "";
+
+        if (row['p1_iD'] == userID) { tempOp = row ['p2_username']; } else { tempOp = row ['p1_username'];}
+
+        if (row ['winner'] == 0) myListOfGameIDs.push (row['game_id']);
 
         if (row['p2_iD'] > 0) {
-           // we have an active match
-           if (row ['players_turn_id'] == userID)
-           {
-              //if (currentGameID <= 0) { currentGameID =  row['game_id']; }
+           // we have an active match may have finished
 
-              if (currentGameID == row['game_id'])
-              {
-                 currentGameshtml += "<tr class=\"highlight-game\"><td>My Turn</td><td onclick =\"setAndShowCurrentGame (" + row['game_id'] +")\">Game " + row['game_id'] + "<td></tr>";
-              }
-              else currentGameshtml += "<tr ><td>My Turn</td><td onclick =\"setAndShowCurrentGame (" + row['game_id'] +")\">Game " + row['game_id'] + "<td></tr>";
+           let radioButton = "<input ";
+
+           if (currentGameID == row['game_id']) radioButton +=  " checked ";
+
+           radioButton += "onchange=\"radioChange (event) \" type=\"radio\" id=\"radio_id_" + row['game_id'] + "\" name=\"selectgame\" value=\"" + row['game_id'] + "\">";
+
+           if ((finished == false) && (row ['winner'] == 0)) {
+               if (row ['players_turn_id'] == userID)
+               {
+                  // My TURN
+                 currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>Mine</td><td>" + radioButton + "</td></tr>";
+               }
+               else {  currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>Theirs</td><td>" + radioButton + "</td></tr>"; }
+               countofRowstoDisplay++;
 
            }
-           else { currentGameshtml += "<tr><td>Their Turn</td><td>Game " + row['game_id'] + "<td></tr>"; }
+           else if ((finished == true) && (row ['winner'] >= 1))
+           {
+              currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>";
+
+              if ( row ['winner'] == 3) { currentGameshtml += "Draw"; }
+              {
+                  if (userID == row ['p1_iD'] ) {
+                      if ( row ['winner'] == 1)  { currentGameshtml += "Won"; } else  if ( row ['winner'] == 2)  { currentGameshtml += "Lost"; }
+                  }
+                  else  if ( row ['winner'] == 2)  { currentGameshtml += "Won"; } else  if ( row ['winner'] == 1)  { currentGameshtml += "Lost"; }
+              }
+
+              currentGameshtml += "</td><td>" + radioButton + "</td></tr>";
+              countofRowstoDisplay++;
+           }
         }
-        else { currentGameshtml += "<tr><td>Waiting for an Opponent</td><td>Game " + row['game_id'] + "</td></tr>";
+        else if (finished == false) {
+            countofRowstoDisplay++;
+            currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>waiting</td></tr>";
         }
     }
 
-    myNode.innerHTML = "<h2>Current Games</h2><table>" + currentGameshtml + "</table>";
+    if (countofRowstoDisplay == 0) {
+        if (finished == false) { myNode.innerHTML = "<span class=\"nogames\">No Current Games</span>"; }
+        else { myNode.innerHTML = "<span class=\"nogames\">No Games Finished</span>";
+}
+    }
+    else myNode.innerHTML = "<table>" + currentGameshtml + "</table>";
 }
 
-/*
-        left-login-status
-            left-new-game
-            left-joinable
-            left-response
-*/
 
 $(function () {
     $("form").on('submit', function (e) { e.preventDefault(); });
@@ -337,283 +1252,31 @@ $(function () {
 //    $( "#creategame" ).click(function() { sendCreateGame(); });
 });
 
-
 function displayUserStatus () {
-
     if (userName != "")
     {
         const myNode = document.getElementById("left-login-status");
-
-        myNode.innerHTML = "<h2>Welcome <b>" + userName + "</b></h2>" +
-
-        "<button float=\"inline-end;\" onclick =\"displayUserStatus ( )\" id=\"displayGame\" class=\"btn btn-default\" >Refresh</button>";
-
-        requestStatus();    //
+        myNode.innerHTML = "<table><tr class=\"player_signed_in\"><td></td><td class=\"player_name\">" + userName + "&nbsp;&nbsp;</td>"
+                        + "<td><button onclick =\"sendCreateGame ()\" id=\"creategame\" class=\"btn btn-default\" >New</button></td>"
+                        + "<td><button onclick =\"logoutUser ( )\" id=\"logoutUser\" class=\"btn btn-default\" >Logout</button></td>" +
+                           "</td><td><button onclick =\" displayUserStatus ( )\" id=\"displayUserStatus\" class=\"btn btn-default\" >Refresh</button></td></tr></table>";
+        requestStatus();
     }
 }
 
-function displayBoard(words) {
-    /*
-       T = Triple Word Score
-       D = Double Word Score
-       B = Blank - no extra scores
-       2 = Double Letter Score
-       3 = Triple Letter Score
-    */
-    const mtBoardStr = "TBB2BBBTBBB2BBT" +
-                       "BDBBB3BBB3BBBDB" +
-                       "BBDBBB2B2BBBDBB" +
-                       "2BBDBBB2BBBDBB2" +
-                       "BBBBDBBBBBDBBBB" +
-                       "B3BBB3BBB3BBB3B" +
-                       "BB2BBB2B2BBB2BB" +
-                       "TBB2BBBDBBB2BBT" +
-                       "BB2BBB2B2BBB2BB" +
-                       "B3BBB3BBB3BBB3B" +
-                       "BBBBDBBBBBDBBBB" +
-                       "2BBDBBB2BBBDBB2" +
-                       "BBDBBB2B2BBBDBB" +
-                       "BDBBB3BBB3BBBDB" +
-                       "TBB2BBBTBBB2BBT";
-
-    $("#board-body").innerHTML = "";
-    $("#board-body").append("<tr>");
-
-    for (let i = 0; i < 225; i++) {
-        if (((i % 15) == 0) && (i > 0))
-        {
-            $("#board-body").append("</tr>");
-            $("#board-body").append("<tr>");
-         }
-
-         if (words[i] != " ") {
-            let lcLetter= words[i].toLowerCase();
-
-            if (words[i] === lcLetter) {
-               $("#board-body").append("<td class=\"board-wild-td\"><img class=\"board-wild-img\" src=\"images/" + lcLetter + ".svg\" /></td>");
-            }
-            else  {
-               $("#board-body").append("<td><img class=\"board-image\" src=\"images/" + lcLetter + ".svg\" /></td>");
-            }
-         }
-         else {
-             switch(mtBoardStr[i]) {
-                case "T": $("#board-body").append("<td id = \"board_td_" + i + "\" ondragover=\"allowDrop(event)\" ondrop=\"droponboard(event)\" class=\"triple-word\">Triple<br>Word</td>");
-                    break;
-                case "D": $("#board-body").append("<td id = \"board_td_" + i + "\" ondragover=\"allowDrop(event)\" ondrop=\"droponboard(event)\" class=\"double-word\">Double<br>Word</td>");
-                    break;
-                case "3": $("#board-body").append("<td id = \"board_td_" + i + "\"ondragover=\"allowDrop(event)\" ondrop=\"droponboard(event)\" class=\"triple-letter\">Triple<br>Letter</td>");
-                    break;
-                case "2": $("#board-body").append("<td id = \"board_td_" + i + "\" ondragover=\"allowDrop(event)\" ondrop=\"droponboard(event)\" class=\"double-letter\">Double<br>Letter</td>");
-                    break;
-                default:  $("#board-body").append("<td id = \"board_td_" + i + "\" ondragover=\"allowDrop(event)\" ondrop=\"droponboard(event)\" class=\"plain-score\"></td>");
-            }
-         }
-    }
-    $("#board-body").append("</tr>");
-}
-
-var dragFromID = "";
-
-
-function allowDrop(ev) {
-  ev.preventDefault();
-}
-
-function drag(ev) {
-  //ev.dataTransfer.setData("text", ev.target.id);
-  dragFromValue =  ev.target.value;
-  dragFromID    =  ev.target.id;
-}
-
-function droponboard (ev) {
-  ev.preventDefault();
-  let str = "Rack to Board Drop from " + dragFromID + " to " + ev.target.id;
-  console.log (str);
-
-  let fromType       = dragFromID.substring (0,(dragFromID.length-1));
-  let fromRackOffset = -1;
-  let toType         = ev.target.id.substring (0,9);
-  let toBoardOffset  = -1;
-
-  if (fromType === "rack_img_")
-  {
-      // Dragging letter from rack
-      fromRackOffset = dragFromID.substr (dragFromID.length-1);
-
-      if (toType === "board_td_")
-      {
-         // dragging letter from rack to board
-         toBoardOffset = ev.target.id.substr (9);
-
-         // the objects stored in the following array will be boardIndex,rackindex, letter // uppercase not a wild card lowercase wild carded letter
-
-         let lcLetter = myRack[fromRackOffset];
-         let wildCardUsed = false;
-
-         if (lcLetter === "*") {
-            let   tempLetter = prompt ("Please enter Wild Card Letter", "");
-            const aLetterRegEx = /^[a-zA-Z]{1}$/; // regex for a single alphabetic character any case
-            //tempLetter.value.match(aLetterRegEx)
-            if (true) { // XXXXXX neeed to work out why the match always returns undefined
-               retractableLetters.push([toBoardOffset,fromRackOffset,lcLetter]);
-               lcLetter = tempLetter.toLowerCase ();
-               wildCardUsed = true;
-            }
-            else { return ; };
-         }
-         else {
-            lcLetter = myRack[fromRackOffset].toLowerCase ();
-            retractableLetters.push([toBoardOffset,fromRackOffset,lcLetter]);
-         }
-
-         /*
-         I wanted to use substring but it always behaved weirdly when * are involved [RE TA IN*] caused issues never worked correctly when moving N
-
-         let tempRack = myRack.substring (0,fromRackOffset);
-         tempRack = tempRack + " ";
-         console.log (myRack.substring (fromRackOffset+1,9))
-         tempRack = tempRack + myRack.substring (fromRackOffset+1,9); //up to and excluding the last offset
-         */
-
-         let tempRack = "";
-         for (let i = 0; i < 9; i++){
-            if (i == fromRackOffset) {
-               tempRack = tempRack + " ";
-            }
-            else { tempRack = tempRack + myRack [i]; }
-         }
-
-         myRack = tempRack;
-         clearRack ();
-         displayRack();
-
-         // Now update the board
-
-         const myNode = document.getElementById(ev.target.id);
-
-         if (wildCardUsed) {
-            myNode.innerHTML = "<td class=\"board-wild-td\"><img class=\"board-wild-img\" src=\"images/" + lcLetter + ".svg\" /></td>";
-
-         }
-         else { myNode.innerHTML = "<td><img class=\"board-image\" src=\"images/" + lcLetter + ".svg\" /></td>"; }
-         //"<td class=\"board-wild-td\"><img class=\"board-wild-img\" src=\"images/" + lcLetter + ".svg\" /></td>");
-
-         /*
-         myRack = tempRack;
-         clearRack ();
-         displayRack();
-      */
-
-      }
-  }
-  dragFromID = "";
-}
-
-function droponrack (ev) {
-  ev.preventDefault();
-  let str = "Drag and Drop between " + dragFromID + " and " + ev.target.id;
-
-  let fromType       = dragFromID.substring (0,(dragFromID.length-1));
-  let fromRackOffset = -1;
-  let toType         = ev.target.id.substring (0,(ev.target.id.length-1));
-  let toRackOffset   = -1;
-  let toBoardOffset  = -1;
-
-  if (fromType === "rack_img_")
-  {
-      // Dragging letter from rack
-      fromRackOffset = dragFromID.substr (dragFromID.length-1);
-
-      if ((toType === "rack_img_") || (toType === "rack_td_"))
-      {
-         // dragging letter rack to rack
-         toRackOffset = ev.target.id.substr (ev.target.id.length-1);
-
-         if (toRackOffset != fromRackOffset)
-         {
-            // wow there is no replace character at index position within a string. What is this javascript!!!
-
-            let tempRack = "";
-            for (let i = 0; i < 9; i++)
-            {
-              if (i == toRackOffset) {
-                 tempRack = tempRack + myRack [fromRackOffset];
-              }
-              else if (i == fromRackOffset) {
-                 tempRack = tempRack + myRack [toRackOffset];
-              }
-              else {
-                 tempRack = tempRack + myRack [i];
-              }
-            }
-
-            myRack = tempRack;
-            clearRack ();
-            displayRack();
-         }
-
-      }
-  }
-  dragFromID = "";
-}
-function resetRack () {
-   // moves letter back from the board to the rack
-   /*
-   while (retractableLetters.length > 0)
-   {
-       let temp = retractableLetters.pop ();
-       temp [1]
-   }
-
-    = [];
-
-            retractableLetters.push([toBoardOffset,fromRackOffset,lcLetter]);
-   */
-}
-
-function clearRack ()
+function logoutUser ()
 {
-   // this functions removes the 9 <td> elements and children
-   // due some slot are blank and not draggable it is simplest to delete all nine and then display them again
-   document.getElementById("rack_0").remove();
-   document.getElementById("rack_1").remove();
-   document.getElementById("rack_2").remove();
-   document.getElementById("rack_3").remove();
-   document.getElementById("rack_4").remove();
-   document.getElementById("rack_5").remove();
-   document.getElementById("rack_6").remove();
-   document.getElementById("rack_7").remove();
-   document.getElementById("rack_8").remove();
+   disconnect ();
+   userName = "";
+   userID   = 0;
+   window.location.reload();
 }
 
-function displayARackLetter (i) // an rack offset from 0 to 8
-{
-    // if time permits tidy up lowercase issue filenames to upper case letter
-
-    let lcLetter = myRack[i].toLowerCase();
-
-    if (lcLetter === " ") { // blank space in rack
-        $("#rack_tr").append("<td ondragover=\"allowDrop(event)\" id=\"rack_" + i + "\" >" +
-                             "<img id =\"rack_img_" + i + "\" class=\"rack-td\" ondrop=\"droponrack(event)\" src=\"images/clear.png\" /></td>");
-    }
-    else if (lcLetter === "*") { // wildcard in rack - you should do well
-        $("#rack_tr").append("<td ondragover=\"allowDrop(event)\"  id=\"rack_" + i + "\" ondrop=\"droponrack(event)\">" +
-                             "<img id =\"rack_img_" + i + "\" class=\"rack-td\"      src=\"images/*.svg\" draggable=\"true\" ondragstart=\"drag(event)\" /></td>");
-    }
-    else {
-        $("#rack_tr").append ("<td ondragover=\"allowDrop(event)\"  id=\"rack_" + i + "\" class=\"rack-td\"  ondrop=\"droponrack(event)\">" +
-                              "<img id =\"rack_img_" + i + "\" class=\"rack-img\" src=\"images/" + lcLetter + ".svg\" draggable=\"true\" ondragstart=\"drag(event)\" /></td>");
-    }
-}
-
-function displayRack() {
-    // should always be nine because it is padded with spaces. we want to be able to store the rack as sorted by the player
-    // so even when a player has the maximum number of letters 7, there will be two spaces
-    $("#rack_tr").textContent = '';
-
-    for (let i = 0; i < 9; i++) displayARackLetter (i); // rack offset from 0 to 8
-
+function radioChange (ev) {
+   let target_ev = ev.target.id;
+   currentGameID = ev.target.value;
+   clearWordQueryResponse ();
+   requestGameInfo (currentGameID);
 }
 
 function resetElementByID(theID) {
