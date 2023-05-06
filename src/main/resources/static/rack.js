@@ -52,6 +52,7 @@ function wildChooseLetter (ev)
               currentGame.GameBoard.appendBoard ();
           }
       }
+
    }
 }
 
@@ -64,12 +65,31 @@ function  doubleclickonrackletter (ev) {
    }
    else
    {
-       rackOffset = ev.target.id.substr (ev.target.id.length-1);
+      rackOffset = ev.target.id.substr (ev.target.id.length-1);
+
+      if (currentGame.players_turn_id != userID)
+      {
+         alert ("Woah there. Hold your horses. It is not your turn!!!!!");
+
+         return;
+      }
+      //count exchange letters
+      let currentExchangeCount = 0;
+      for (let i = 0; i < 9; i++) if (myExchange[i] != " ") currentExchangeCount++;
+
 
        let tempExchange = "";
        for (let i = 0; i < 9; i++){
            if (i == rackOffset) {
-              if (myExchange [i] != " ") { tempExchange += ' ';} else { tempExchange += myRack [i];}
+              if (myExchange [i] != " ") { tempExchange += ' ';
+              }
+              else {
+                 if (currentExchangeCount == currentGame.letters_left.length) {
+                    tempExchange += myExchange [i];
+                    alert ("No more letters left to exchange.")
+                 }
+                 else tempExchange += myRack [i];
+              }
            } else { tempExchange += myExchange [i]; }
        }
        myExchange = tempExchange;
@@ -119,6 +139,9 @@ function droponboard (ev) {
   if (currentGame.players_turn_id != userID) {
      alert("It is not your turn!!!!");
   }
+  else if (currentGame.GameBoard.getLastPlay () != blankStart) {
+     alert("Challenge or not first!!! Your opponent wants their new letters.");
+  }
   else
   {
       let str = "From to Board Drop from " + dragFromID + " to " + ev.target.id;
@@ -157,6 +180,7 @@ function droponboard (ev) {
                     }
                     else { return ; };
                 }
+                else { return; }
              }
              else {
                 currentGame.GameBoard.placeRetractableLetter (letter,toBoardOffset) // it is

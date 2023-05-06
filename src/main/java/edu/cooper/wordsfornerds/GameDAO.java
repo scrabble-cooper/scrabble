@@ -19,7 +19,7 @@ public class GameDAO extends DataAccessObject {
     private static final String GET_GAME= "SELECT * FROM games WHERE game_id=?";
 //    private static final String UPDATE_GAME = "UPDATE games SET board = ?::TEXT[][] WHERE game_id=?"; //no cast needed
     private static final String UPDATE_GAME = "UPDATE games SET board = ? WHERE game_id=?";
-    private static final String GET_GAME_BY_PLAYER_ID = "SELECT DISTINCT * FROM games WHERE (p1_id=? OR p2_id=?)";
+    private static final String GET_GAME_BY_PLAYER_ID = "SELECT DISTINCT * FROM games WHERE (p1_id=? OR p2_id=?) ORDER BY game_id DESC";
     private static final String UPDATE_WHOLE_GAME = "UPDATE games SET players_turn_id=?, passcount=?, last_update_ts = NOW(), current_round=?, " +
             "p1_score=? , p2_score=?, p1_hand=?, p2_hand=?, letters_left=?, winner=? , board = ?::TEXT[][] WHERE game_id=? ";
     // Update almost the whole table
@@ -27,27 +27,27 @@ public class GameDAO extends DataAccessObject {
     private static final String CREATE_GAME = "INSERT INTO games (p1_id, p1_username) VALUES (?,?) RETURNING game_id";
 
     private static final String JOINABLE_GAMES = "SELECT game_id, user_name AS opponent_name FROM games, users WHERE " +
-            " p2_id IS NULL AND p1_id != ? AND p1_id = users.user_id";
+            " p2_id IS NULL AND p1_id != ? AND p1_id = users.user_id ORDER BY game_id DESC";
 
     private static final String JOIN_GAME_ME_FIRST = "UPDATE games SET p2_id = ?, p2_username = ?,  players_turn_id = p1_id, start_ts = NOW (), last_update_ts = NOW(), " +
-                        " p1_hand = ?, p2_hand = ?, letters_left = ?, current_round = 1 WHERE game_id = ? RETURNING p1_id";
+                        " p1_hand = ?, p2_hand = ?, letters_left = ?, current_round = 1 WHERE game_id = ? AND p2_id IS NULL RETURNING p1_id";
     private static final String JOIN_GAME_ME_SECOND = "UPDATE games SET p2_id = ?, p2_username = ?, start_ts = NOW (), last_update_ts = NOW(), " +
-            " p1_hand = ?, p2_hand = ?, letters_left = ?, players_turn_id = ?, current_round = 1  WHERE game_id = ? RETURNING p1_id";
+            " p1_hand = ?, p2_hand = ?, letters_left = ?, players_turn_id = ?, current_round = 1  WHERE game_id = ? AND p2_id IS NULL RETURNING p1_id";
 
     private static final String MOVE_PLAY = "UPDATE games SET last_update_ts = NOW(), challengecount = ?, passcount = 0, players_turn_id = ?, lastplay = ?, " +
-                                            " p1_hand = ?, p2_hand = ? WHERE game_id = ?";
+                                            " p1_hand = ?, p2_hand = ?, playlog = ? WHERE game_id = ?";
 
     private static final String MOVE_PASS = "UPDATE games SET last_update_ts = NOW(), challengecount = 0, passcount = ?, players_turn_id = ?, " +
-            "  current_round = ? WHERE game_id = ?";
+            "  current_round = ?, winner = ?, playlog = ? WHERE game_id = ?";
     private static final String MOVE_EXCHANGE = "UPDATE games SET last_update_ts = NOW(), challengecount = 0, passcount = 0, players_turn_id = ?, " +
-            "  p1_hand = ?, p2_hand = ?, letters_left = ?, current_round = ? WHERE game_id = ?";
+            "  p1_hand = ?, p2_hand = ?, letters_left = ?, current_round = ?, playlog = ? WHERE game_id = ?";
 
     private static final String MAKE_PERMANENT = "UPDATE games SET last_update_ts = NOW(), passcount = ?, p1_score = ?, p2_score = ?, " +
             " p1_hand = ?, p2_hand = ?, current_round = ? , letters_left = ? , " +
-            " challengecount = ?, board = ?, lastplay = ?, playedby = ?        WHERE game_id = ?";
+            " challengecount = ?, board = ?, lastplay = ?, playedby = ?, winner = ?, players_turn_id = ?, playlog = ?  WHERE game_id = ?";
 
     private static final String UNMAKE_LAST_MOVE = "UPDATE games SET last_update_ts = NOW(),  p1_hand = ?, p2_hand = ?, current_round = ? ," +
-            " players_turn_id = ?, challengecount = ?, lastplay = ?      WHERE game_id = ?";
+            " players_turn_id = ?, challengecount = ?, lastplay = ?, playlog = ?      WHERE game_id = ?";
 
     public GameDAO() {
         super(dbconnection);
@@ -108,6 +108,12 @@ public class GameDAO extends DataAccessObject {
                 if (rs.next()) {
                     Result = rs.getLong("p1_id");
                 }
+                else {
+                    // Probably someone has already joined this game first
+                    Result = 0;
+                }
+
+
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -160,6 +166,7 @@ public class GameDAO extends DataAccessObject {
                 do {
                     JSONObject tempJobj = new JSONObject();
                     tempJobj.put ("game_id", rs.getLong("game_id"));
+                    tempJobj.put ("opponent_name", rs.getString("opponent_name"));
                     obj.put      (i,tempJobj);
                     i++;
                 }
@@ -253,6 +260,8 @@ public class GameDAO extends DataAccessObject {
                     tempJobj.put ("playedby",rs.getString("playedby"));
                     tempJobj.put ("challengecount",rs.getLong("challengecount"));
                     tempJobj.put ("players_turn_id",rs.getLong("players_turn_id"));
+                    tempJobj.put ("playlog",rs.getString("playlog"));
+
                     tempJobj.put ("passcount",rs.getInt("passcount"));
                     obj.put      (i,tempJobj);
                     i++;
@@ -266,19 +275,6 @@ public class GameDAO extends DataAccessObject {
         return obj;
     }
 
-/*
-      JSONObject obj = new JSONObject();
-
-      obj.put("name", "foo");
-      obj.put("num", new Integer(100));
-      obj.put("balance", new Double(1000.21));
-      obj.put("is_vip", new Boolean(true));
-
-      JSONArray array = new JSONArray();
-array.add("element_1");
-array.add("element_2");
-array.add("element_3");
- */
     public JSONObject findById(long id){
         JSONObject tempJobj = new JSONObject();
         try(PreparedStatement statement = this.connection.prepareStatement(GET_GAME);) {
@@ -304,6 +300,7 @@ array.add("element_3");
                 tempJobj.put ("playedby",rs.getString("playedby"));
                 tempJobj.put ("challengecount",rs.getLong("challengecount"));
                 tempJobj.put ("passcount",rs.getInt("passcount"));
+                tempJobj.put ("playlog",rs.getString("playlog"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -334,7 +331,8 @@ array.add("element_3");
             statement.setString (3,  jo.getString ("lastplay"        ));
             statement.setString (4,  jo.getString ("p1_hand"         ));
             statement.setString (5,  jo.getString ("p2_hand"         ));
-            statement.setLong   (6,  jo.getLong   ("game_id"         ));
+            statement.setString (6,  jo.getString ("playlog"         ));
+            statement.setLong   (7,  jo.getLong   ("game_id"         ));
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -358,10 +356,13 @@ array.add("element_3");
             statement.setInt     (6,  jo.getInt    ("current_round"  ));
             statement.setString  (7,  jo.getString ("letters_left"   ));
             statement.setInt     (8,  jo.getInt    ("challengecount" ));
-            statement.setString  (9, jo.getString  ("board"          ));
+            statement.setString  (9,  jo.getString ("board"          ));
             statement.setString  (10, jo.getString ("lastplay"       ));
             statement.setString  (11, jo.getString ("playedby"       ));
-            statement.setLong    (12,  jo.getLong   ("game_id"        ));
+            statement.setInt     (12, jo.getInt    ("winner"         ));
+            statement.setLong    (13, jo.getLong   ("players_turn_id"));
+            statement.setString  (14, jo.getString ("playlog"         ));
+            statement.setLong    (15, jo.getLong   ("game_id"        ));
 
 
             statement.executeUpdate();
@@ -383,8 +384,9 @@ array.add("element_3");
             statement.setLong    (4,  jo.getLong  ("players_turn_id" ));
 
             statement.setInt     (5,  jo.getInt    ("challengecount" ));
-            statement.setString  (6, jo.getString ("lastplay"       ));
-            statement.setLong    (7,  jo.getLong   ("game_id"        ));
+            statement.setString  (6,  jo.getString ("lastplay"       ));
+            statement.setString  (7,  jo.getString ("playlog"         ));
+            statement.setLong    (8,  jo.getLong   ("game_id"        ));
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -405,10 +407,12 @@ array.add("element_3");
             int  passcount       = jo.getInt ("passcount");
             int current_round    = jo.getInt("current_round");
 
-            statement.setInt  (1, passcount);
-            statement.setLong (2, players_turn_id);
-            statement.setInt  (3, current_round);
-            statement.setLong (4, game_id);
+            statement.setInt    (1, passcount);
+            statement.setLong   (2, players_turn_id);
+            statement.setInt    (3, current_round);
+            statement.setInt    (4, jo.getInt("winner"));
+            statement.setString (5,  jo.getString ("playlog"));
+            statement.setLong   (6, game_id);
 
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -431,12 +435,13 @@ array.add("element_3");
             String p2_hand       = jo.getString("p2_hand");
             String letters_left  = jo.getString("letters_left");
 
-            statement.setLong  (1, players_turn_id);
-            statement.setString(2, p1_hand);
-            statement.setString(3, p2_hand);
-            statement.setString(4, letters_left);
-            statement.setInt   (5, current_round);
-            statement.setLong  (6, game_id);
+            statement.setLong   (1, players_turn_id);
+            statement.setString (2, p1_hand);
+            statement.setString (3, p2_hand);
+            statement.setString (4, letters_left);
+            statement.setInt    (5, current_round);
+            statement.setString (6, jo.getString ("playlog"));
+            statement.setLong   (7, game_id);
 
             statement.executeUpdate();
         } catch (SQLException e) {

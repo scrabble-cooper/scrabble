@@ -62,6 +62,16 @@ function  showLetters (theLetters) {
 
 }
 
+function pointsInLetters (pointMe)  // nothing to do with the board class but put here because of the letterValues array above
+{
+  let tempScore = 0;
+
+  for (let i = 0; i < pointMe.length; i++) {
+     if ((pointMe[i] != " ") && (pointMe[i] != "*")) tempScore += letterValues [pointMe [i]];
+  }
+
+  return tempScore;
+}
 
 class board {
    // class assumes the element ID passed is a <table> and that this class controls all the rows and columns
@@ -256,7 +266,7 @@ class board {
                         break;
              case "2":
                         result.setAttribute ('class', "double-letter");
-                        result.innerHTML = "Double<br Letter";
+                        result.innerHTML = "Double Letter";
                         break;
              default:
                         result.setAttribute ('class', "plain-score");
@@ -435,12 +445,20 @@ class board {
 
    scorePreviouslyPlayedLetters (firstLetterOffset,decrement) // decrement is one for Horizontal and this.#width for vertical
    {
+       let column = this.cFO (firstLetterOffset);
+       let row    = this.rFO (firstLetterOffset);
+
        let score = 0;
        previousStem = ""; // we will need this when we show word with scores
 
        let offset = firstLetterOffset - decrement;
 
-       while ((offset >= 0) && (this.#thewords[offset] != " "))
+
+       while ((offset >= 0) && (this.#thewords[offset] != " ") &&
+               (( (decrement == this.#width) && (column == this.cFO (offset) ) ) // ensure the loop stays in the same row or column
+                  ||                                                             //
+               ( (decrement == 1)            &&  (row    == this.rFO (offset))) ) // as the firstLetterOffset
+       )
        {
           score += letterValues [this.#thewords[offset]];
           previousStem = this.#thewords[offset] + previousStem;
@@ -789,9 +807,19 @@ class board {
 
    clearAndReturnLastPlayed ()
    {
-      let result = this.#lastplay;
+      let result = "";
+      let tempResult = this.#lastplay.replaceAll (" ","");
+
+      // check for lowercase as they will be a wild card * letter
+
+      for (let i = 0;   i < tempResult.length; i++) {
+         if ((tempResult.charCodeAt(i) >= 65) && (tempResult.charCodeAt(i) <= 90)) { result += tempResult [i];  }
+         else { result += "*"; }
+      }
+
       this.#lastplay  = blankStart;
-      return result.replaceAll (" ","");
+
+      return result;
    }
 
    updateBoardWithLastPlayed (player_number)
@@ -819,12 +847,6 @@ class board {
 
       return lettersPlayed;
    }
-
-
-
-
-
-
 
    removeBoard ()
    {

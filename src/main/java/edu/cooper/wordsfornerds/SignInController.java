@@ -31,6 +31,13 @@ public class SignInController {
 
 		JSONObject jObj = new JSONObject();
 
+		if (user_name.matches("^[a-zA-Z0-9]*$") == false)
+		{
+			// stop any sql escape character issues
+			jObj.put ("result", "false");
+			jObj.put ("response", "Username Invalid : " + user_name + ".");
+		}
+        else
 		{
 			PlayerDAO playerdao = new PlayerDAO ();
 			Player player = playerdao.findByUsername(user_name);
@@ -57,6 +64,7 @@ public class SignInController {
 		}
 		jObj.put ("txName", txName);
 		jObj.put ("txData","signin");
+		jObj.put ("user_name", user_name);
 
 		System.out.println (jObj.toString() );
 		return new SignIn (jObj.toString());
@@ -87,20 +95,35 @@ public class SignInController {
 
 		JSONObject jObj = new JSONObject();
 
-		if (registerPlayer.length() < 4)
+		if (registerPlayer.length() >8)
+		{
+			jObj.put ("result", "false");
+			jObj.put ("response", "Name too long. Must be eight or fewer characters.");
+		}
+		else if (registerPlayer.length() < 4)
 		{
 			jObj.put ("result", "false");
 			jObj.put ("response", "Name too short. Must be four or more characters.");
+		}
+		else if (registerPlayer.matches("^[a-zA-Z0-9]*$") == false)
+		{
+			jObj.put ("result", "false");
+			jObj.put ("response", "Name must be alphanumeric with no spaces.");
 		}
 		else if (passwordOne.compareTo(passwordTwo) != 0)
 		{
 			jObj.put ("result", "false");
 			jObj.put ("response", "Passwords are not the same.");
 		}
-		else if (passwordOne.length () < 8)
+		else if (passwordOne.length () < 6)
 		{
 			jObj.put ("result", "false");
-			jObj.put ("response", "Password too short. Must be eight or more characters.");
+			jObj.put ("response", "Password too short. Must be six or more characters.");
+		}
+		else if (passwordOne.matches("^[a-zA-Z0-9]*$") == false)
+		{
+			jObj.put ("result", "false");
+			jObj.put ("response", "Password must be alphanumeric with no spaces.");
 		}
 		else
 		{
@@ -288,7 +311,7 @@ public class SignInController {
 
 		JSONObject jGames = gamedao.findById (gameID);
 
-		jGames.put ("txData","movePlay");
+		jGames.put ("txData","moveplay");
 		jGames.put ("game_id",gameID);
 		jGames.put ("txName",txName);
 
@@ -304,10 +327,7 @@ public class SignInController {
 
 		JSONObject jo = new JSONObject(message);
 
-		Long gameID     = jo.getLong   ("game_id");
-		String txName   = jo.getString ("txName");    // must always be present
 		String wordList = jo.getString ("wordlist");
-		Long userID     = jo.getLong   ("user_id");
 
 		DictionaryDAO dictionaryDAO = new DictionaryDAO();
 
@@ -317,9 +337,9 @@ public class SignInController {
 
 		jReturn.put ("dictionary_response",obj);
 		jReturn.put ("txData","wordquery");
-		jReturn.put ("user_id","movePlay");
-		jReturn.put ("game_id",gameID);
-		jReturn.put ("txName",txName);
+		jReturn.put ("user_id",jo.getLong   ("user_id"));
+		jReturn.put ("game_id",jo.getLong   ("game_id"));
+		jReturn.put ("txName", jo.getString ("txName"));
 
 		return new SignIn (jReturn.toString());
 

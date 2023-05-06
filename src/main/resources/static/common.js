@@ -45,9 +45,9 @@ function createNodeFromHTML (htmlString) {
 
 function displayStartNewGameButton ()
 {
-   let myNode = document.getElementById("left-new-game");
-
-   myNode.innerHTML = "<button onclick =\"sendCreateGame ()\" id=\"creategame\" class=\"btn btn-default\" >New Game</button>";
+  // let myNode = document.getElementById("left-new-game");
+  // going to be renamed to show standings if there is time
+  //myNode.innerHTML = "<button onclick =\"sendCreateGame ()\" id=\"creategame\" class=\"btn btn-default\" >New Game</button>";
 }
 
 
@@ -149,8 +149,11 @@ function sendRefreshOpponnent (opponentID) {
     stompClient.send("/app/refreshopponnent", {}, JSON.stringify({'opponentid': opponentID,'txName':termID }));
 }
 
+
 function sendRegistration() {
-    //connect ();
+
+
+
     stompClient.send("/app/register", {},
                      JSON.stringify({'regname': $("#regname").val(),
                                      'regpassword1': $("#regpassword1").val(),
@@ -174,11 +177,15 @@ function showResponse(message) {
 
     console.log (obj);
 
+    consoleOutLetterCount ("showResponse-begin");
+
+
     if (obj.txName == (termID))
     {
         // response is for this client it for this
-        $("#response").innerHTML = "";
+       // $("#response").innerHTML = "";
         const responseNode = document.getElementById("response");
+        responseNode.innerHTML = "";
         //responseNode.appendChild (document.createTextNode(message));
         if (obj.txData == "register") {
             if (obj.result == "true") {
@@ -215,14 +222,11 @@ function showResponse(message) {
            const objArr = obj.gamesInfo;
            let currentNumberOfGames = objArr.length;
 
-           if (currentNumberOfGames == 0) {
-             // allow create new game
-              displayStartNewGameButton ();
-           }
-           else {
-             displayCurrentGames (objArr,currentNumberOfGames);
-           }
+           displayStartNewGameButton (); // Allows player to create a new game which others players can join. when they join the game starts
+           displayCurrentGames (objArr,currentNumberOfGames); // show unfinished games only
            requestJoinableGames();
+           displayCurrentGames (objArr,currentNumberOfGames, true); // show finished games
+
         } else
         if (obj.txData == "creategame")
         {
@@ -230,8 +234,17 @@ function showResponse(message) {
         } else
         if (obj.txData == "joingame")
         {
-           currentGameID   = obj.game_id;
-           requestGameInfo (currentGameID);
+           clearWordQueryResponse ();
+           if (obj.opponent_id == 0) {
+              // someone joined the game before us :(
+              currentGameID = -1;
+              responseNode.innerHTML = "Too slow. Someone else joined the Game!!";
+
+           }
+           else {
+             currentGameID   = obj.game_id;
+             requestGameInfo (currentGameID);
+           }
         } else
         if (obj.txData == "joinables")
         {
@@ -250,12 +263,19 @@ function showResponse(message) {
            if (obj.txData == "wordquery")
            {
               if (displayWordQueryResponse (obj.dictionary_response,obj.dictionary_response.length)) {
-                 // Challenge was unsuccessful
-                  makeLastMovePermanent ();
-               } else {
+                  // Challenge was unsuccessful
+                  appendToPlayLog ("chun");
+
+                  if (currentGame.challengecount >= 1) {
+                     makeLastMovePermanent (true); // they lost the second challenge switch back to other player
+                  }
+                  else {
+                     makeLastMovePermanent (); // they lost first challenge
+                  }
+               }
+               else {
+                   appendToPlayLog ("chok");
                    unMakeLastMove ();
-
-
                }
            }
            if (obj.txData == "requestgameinfo")
@@ -265,7 +285,9 @@ function showResponse(message) {
                  currentGame = obj;
                  myExchange  = "         ";
 
-                 currentGameID == obj.game_id;
+                 consoleOutLetterCount ("showResponse-requestgameinfo");
+
+                 currentGameID = obj.game_id;
 
                  if (obj.p1_iD == userID) { myRack   = obj.p1_hand; } else { myRack   = obj.p2_hand; }
                  while (myRack.length < 9) myRack += " ";
@@ -294,18 +316,18 @@ function showResponse(message) {
                          requestGameInfo (currentGameID);
                          break;
 
-              case "movePlay":
+              case "moveplay":
                          requestGameInfo (currentGameID);
                          break;
-              case "movePass":
+              case "movepass":
                          requestGameInfo (currentGameID);
                          break;
-              case "moveExchange":
+              case "moveexchange":
                          requestGameInfo (currentGameID);
                          break;
               case "wordquery":
-                      displayWordQueryResponse (obj.dictionary_response,obj.dictionary_response.length);
-                      break;
+                         displayWordQueryResponse (obj.dictionary_response,obj.dictionary_response.length);
+                         break;
               default:
           }
        }
@@ -314,14 +336,19 @@ function showResponse(message) {
           if ((myListOfGameIDs.indexOf(obj.game_id) != -1 ) && (obj.txData == "joingame"))
           {
              console.log (obj.opponent_id + " " + userID);
-             //CurrentGameID = obj.game_id;
+             currentGameID = obj.game_id;
              requestGameInfo (obj.game_id);
           }
 
 
        }
-
-//       if ((obj.txData == "refreshopponnent") && (obj.txName == userID)) { requestStatus (); }
+       else {
+          if ((obj.txData == "signin") && ( userName != "") && (obj.user_name == userName))
+          {
+             // The same user has signed in again so log them out this instance instantly!!!
+             logoutUser ();
+          }
+       }
     }
 }
 
@@ -365,7 +392,7 @@ function unMakeLastMove ()
                        'challengecount'  : currentGame.challengecount,
 
                        'players_turn_id' : currentGame.players_turn_id,
-
+                       'playlog'         : currentGame.playlog,
                        'lastplay'        : currentGame.GameBoard.getLastPlay(),
                        'txName'          : termID}
       ));
@@ -373,79 +400,185 @@ function unMakeLastMove ()
 
 }
 
+function appendToPlayLog (theMove,arg1,arg2)     // play ltrs off , pass, exch #, noch, chok, chun, resg
+{
+   switch (theMove) {
 
+      case "play":  // play, the letters played and the offset of the board for the first letter
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  + ", " + arg1  + ", " + arg2 ;
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "pass":  // pass
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  +  ", " + " " +  ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+
+         break;
+
+      case "exch":  // exchanged count number of letters exchanged
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  + ", " + arg1 + ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "noch":  // noch
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove + ", +" + currentGame.GameBoard.retrieveMovePoints ();
+         currentGame.playlog += ", " + " " +  ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "chok":  // challenge ok succeeded
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  +  ", " + " " +  ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "chun":  // challenged unsuccesful failed
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  + ", +" + currentGame.GameBoard.retrieveMovePoints ();
+         currentGame.playlog +=  ", " + " " +  ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+
+      case "resg":  // gave up already failed
+         currentGame.playlog += currentGame.current_round + ", " + userName  + ", " + theMove  +  ", " + " " +  ", " + " ";
+         currentGame.playlog += ", " + currentGame.p1_score +  ", " + currentGame.p2_score + "\n";
+         break;
+   }
+}
 
 function accept ()
 {
+   clearWordQueryResponse (); // if any
+   appendToPlayLog ("noch");
    makeLastMovePermanent ();
-
-//   updatePlayersView ();
 }
 
 function updatePlayersView ()
 {
-    if (currentGame.p1_iD == userID) {
-       myRack   = currentGame.p1_hand;
-    } else {
-       myRack   = currentGame.p2_hand;
-    }
-
-    while (myRack.length < 9) myRack += " ";
-
-    myExchange = "         ";
-    clearRack();
-    displayRack ();
-
-    currentGame.GameBoard.appendBoard ();
-
-    if ((currentGameID != 0) && (currentGame.GameBoard.getLastPlay () != blankStart))
+    if (currentGameID != -1)
     {
-       let score = currentGame.GameBoard.scorePlayedLetters ();
+        if (currentGame.p1_iD == userID) {
+           myRack   = currentGame.p1_hand;
+        } else {
+           myRack   = currentGame.p2_hand;
+        }
 
-       showChallengeDiv (currentGame.GameBoard.retrieveNewWords());
+        while (myRack.length < 9) myRack += " ";
+
+        myExchange = "         ";
+        clearRack();
+        displayRack ();
+
+        currentGame.GameBoard.appendBoard ();
+
+        consoleOutLetterCount ("updatePlayersView");
+
+        if (currentGame.winner == 0)
+        {
+            showPlayerScores ();
+
+            if ((currentGameID != 0) && (currentGame.GameBoard.getLastPlay () != blankStart))
+            {
+               let score = currentGame.GameBoard.scorePlayedLetters ();
+
+               showChallengeDiv (currentGame.GameBoard.retrieveNewWords());
+            }
+            else hideChallengeDiv ();
+
+            showNumberOfBagLetters ();
+
+            showPlayLog (6);
+
+            if ((currentGameID != 0) && (currentGame.GameBoard.getLastPlay () == blankStart) && (currentGame.players_turn_id == userID)) {
+               enableActionButtons ();
+            }
+            else  disableActionButtons ();
+        }
+        else {
+            showPlayerScores ();
+            showPlayLog (200); // basically show the whole log
+            hideChallengeDiv ();
+            disableActionButtons ();
+        }
     }
-    else hideChallengeDiv ();
-
-    showPlayerScores ();
-
-    showNumberOfBagLetters ();
-
-    if (currentGame.players_turn_id == userID) {
-       enableActionButtons ();
-    }
-    else  disableActionButtons ();
 }
 
-
-function makeLastMovePermanent ()
+function makeLastMovePermanent (changeTurn = false)
 {
    let player_number = 1;
-   if (currentGame.players_turn_id == currentGame.p1_iD){
+   if (currentGame.players_turn_id == currentGame.p1_iD) {
       // it is player ones turn so the last move was by player 2
       player_number = 2;
    }
+   consoleOutLetterCount ("MakeLastMovePermanent 11111 ");
 
-   //currentGame.lastplay
    let lettersPlayed = currentGame.GameBoard.updateBoardWithLastPlayed (player_number);
 
    if (player_number == 2) {
       currentGame.p2_score += currentGame.GameBoard.retrieveMovePoints ();
 
-      currentGame.p2_hand = currentGame.p2_hand.replace(/\s+/g, '');
+      currentGame.p2_hand = currentGame.p2_hand.replaceAll(" ", '');
 
-      for (let i = 0; i < lettersPlayed.length; i++ ) currentGame.p2_hand = currentGame.p2_hand.replace(lettersPlayed [i], '');
+      consoleOutLetterCount ("MakeLastMovePermanent 22222 " + currentGame.p2_hand + " " + lettersPlayed);
 
       currentGame.p2_hand += dealLetters (7 - currentGame.p2_hand.length);
+
+      // check for a winner
+      // winner field -- always with respect to p1  0 : incomplete  1 : wins   2 : lost  3 : draw  4 : abandon
+
+      if (currentGame.p2_hand.replaceAll (" ", "").length == 0) {
+
+          // p2 finished
+
+          let pIL = pointsInLetters (currentGame.p1_hand);
+          // alter scores ie p2 gets points from other players hand
+          // and they lose those points
+
+          currentGame.p2_score += pIL;
+          currentGame.p1_score -= pIL;
+
+          if (currentGame.p1_score > currentGame.p2_score) {
+             currentGame.winner = 1;
+          }
+          else if (currentGame.p1_score == currentGame.p2_score) {
+             currentGame.winner = 3;
+          } else currentGame.winner = 2;
+      }
+
    }
    else {
       currentGame.p1_score += currentGame.GameBoard.retrieveMovePoints ();
 
-      currentGame.p1_hand = currentGame.p1_hand.replace(/\s+/g, '');
+      currentGame.p1_hand = currentGame.p1_hand.replaceAll(" ", '');
 
-      for (let i = 0; i < lettersPlayed.length; i++ ) currentGame.p1_hand = currentGame.p1_hand.replace(lettersPlayed [i], '');
+      consoleOutLetterCount ("MakeLastMovePermanent 33333 " + currentGame.p1_hand + " " + lettersPlayed);
 
       currentGame.p1_hand += dealLetters (7 - currentGame.p1_hand.length);
+
+      if (currentGame.p1_hand.replaceAll (" ", "").length == 0) {
+
+          // p1 finished
+
+          currentGame.winner = 1;
+          let pIL = pointsInLetters (currentGame.p2_hand);
+          // alter scores ie p1 gets points from other players hand
+          // and they lose those points
+
+          currentGame.p1_score += pIL;
+          currentGame.p2_score -= pIL;
+
+          if (currentGame.p1_score > currentGame.p2_score) {
+             currentGame.winner = 1;
+          }
+          else if (currentGame.p1_score == currentGame.p2_score) {
+             currentGame.winner = 3;
+          } else currentGame.winner = 2;
+      }
+    }
+
+   if (changeTurn == true) {
+      // Basically your 2nd challenge failed
+      console.log ("Update Last Moved played but switch players turn id ");
+      if (currentGame.players_turn_id == currentGame.p1_iD) { currentGame.players_turn_id = currentGame.p2_iD; } else { currentGame.players_turn_id = currentGame.p1_iD; }
    }
+
+   consoleOutLetterCount ("MakeLastMovePermanent");
 
    currentGame.current_round += 1;
    currentGame.passcount      = 0;
@@ -467,10 +600,13 @@ function makeLastMovePermanent ()
                        'challengecount'  : currentGame.challengecount,
 
                        'letters_left'    : currentGame.letters_left,
+                       'winner'          : currentGame.winner,
 
+                       'players_turn_id' : currentGame.players_turn_id,
                        'board'           : currentGame.GameBoard.getTheWords(),
                        'playedby'        : currentGame.GameBoard.getPlayedBy(),
                        'lastplay'        : currentGame.GameBoard.getLastPlay(),
+                       'playlog'         : currentGame.playlog,
                        'txName'          : termID}
       ));
 }
@@ -480,9 +616,13 @@ function dealLetters (dealNLetters)
     let result = "";
     let letterBag = currentGame.letters_left;
 
+    console.log ("DL Start " + dealNLetters + " " + currentGame.letters_left.length);
+
     while ((currentGame.letters_left.length > 0) && (dealNLetters > 0))
     {
         let i = Math.floor(Math.random() * currentGame.letters_left.length);
+
+        console.log ("DL Mid " + i);
 
         result += currentGame.letters_left[i];
 
@@ -496,6 +636,9 @@ function dealLetters (dealNLetters)
 
         dealNLetters--;
     }
+
+    console.log ("DL ENd " + result.length + " " + currentGame.letters_left.length);
+
     return result;
 }
 
@@ -506,12 +649,127 @@ function countOfNonSpaceLetters (aStr)
    return tempStr.length;
 }
 
+function consoleOutLetterCount (markStr)
+{
+   if ((currentGame !== null) && (typeof currentGame.GameBoard !== "undefined"))
+   {
+       let tempWC = currentGame.letters_left.length + countOfNonSpaceLetters (currentGame.p1_hand) + countOfNonSpaceLetters (currentGame.p2_hand)
+            + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay()) + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
+
+        let tempStr =  " r1 " + countOfNonSpaceLetters (currentGame.p1_hand);
+            tempStr += " r2 " + countOfNonSpaceLetters (currentGame.p2_hand);
+            tempStr += " lp " + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay());
+            tempStr += " mb " + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
+            tempStr += " mb " + currentGame.letters_left.length;
+            tempStr += " 100 == " + tempWC;
+            tempStr += " pc " + currentGame.passcount;
+            tempStr += " cc " + currentGame.challengecount;
+
+       console.log (markStr + tempStr);
+   }
+}
+
+
+function showPlayLog (nLines=5)
+{
+   let myNode = document.getElementById("play_log_table");
+
+   let lines = currentGame.playlog.split('\n');
+
+   console.log(lines[lines.length - 2]);
+
+   let tempTable  = "";
+   let tempOffset = lines.length - 2;
+   let i = 0;
+
+   while ((tempOffset >= 0) && (i < nLines))
+   {
+      let row =   lines[tempOffset].split (",");
+
+      tempTable  += "<tr><td>";
+      tempTable  += row [0]; // round
+      tempTable  += "</td><td>";
+      tempTable  += row [1]; // user
+      tempTable  += "</td><td>";
+      tempTable  += row [2]; // move
+      tempTable  += "</td>";
+
+      if ((row [2] == " noch") || (row [2] == " chun")) {
+         tempTable  += "<td class=\"challenged_pts\">";
+         tempTable  += row [3]; // points scored due to no challenge or unsuccessful challenge
+         tempTable  += "</td>";
+      }
+      else {
+         tempTable  += "<td>";
+         tempTable  += row [3]; // number of letters or letters played
+         tempTable  += "</td>";
+      }
+
+
+      if (row [4].replaceAll (" ",'') != "")
+      {
+      // onmouseover="highlight(this);" onmouseout="unhighlight(this)">
+         tempTable += "<td><span onmouseover=\"highlight(" + row [4] + ");\" onmouseout=\"unhighlight(" + row [4] + ");\">" + row [4];
+         tempTable += "</span></td>";
+      }
+      else {
+         tempTable  += "<td>";
+         tempTable  += row [4];
+         tempTable  += "</td>";
+      }
+      tempTable  += "<td>";
+      tempTable  += row [5]; // p1_score
+      tempTable  += "</td>";
+      tempTable  += "<td>";
+      tempTable  += row [6]; // p2_score
+      tempTable  += "</td>";
+
+
+      tempOffset--;
+      i++;
+      tempTable  += "</tr>";
+
+   }
+   myNode.innerHTML =  tempTable;
+}
+
+var savedStyle ;
+
+function highlight(value)
+{
+   let element = document.getElementById('board_td_' + value);
+
+   if (window.getComputedStyle) {
+       savedStyle = window.getComputedStyle(element);
+   } else {
+       savedStyle = element.currentStyle;
+   }
+
+   element.style.backgroundColor = "orange";
+   element.style.border = "thick dashed orange";
+   console.log(value);
+}
+
+function unhighlight(value)
+{
+   let element = document.getElementById('board_td_' + value);
+   element.style = savedStyle
+
+   console.log(value);
+}
+
+$(".highLightMe").mouseover(function () {
+       console.log($(this).val());
+});
+
+
 function showNumberOfBagLetters ()
 {
    let myNode = document.getElementById("letters_div");
 
-   //debug only remove before publishing
-
+   //DO NOT REMOVE VERY USEFUL FOR DEBUGGING WEIRD HAPPENINGS
+   //debug remove before publishing.
+   /*
    let tempWC = currentGame.letters_left.length + countOfNonSpaceLetters (currentGame.p1_hand) + countOfNonSpaceLetters (currentGame.p2_hand)
        + countOfNonSpaceLetters (currentGame.GameBoard.getLastPlay()) + countOfNonSpaceLetters (currentGame.GameBoard.getTheWords());
 
@@ -522,8 +780,17 @@ function showNumberOfBagLetters ()
        tempStr += " 100 == " + tempWC;
        tempStr += " pc " + currentGame.passcount;
        tempStr += " cc " + currentGame.challengecount;
+   */
+   let passStr = "";
 
-   myNode.innerHTML =  tempStr + "<br>" + currentGame.letters_left.length + " : <meter title=\"Letters left to be dealt.\" id=\"letters_dealt\" value=\"" + currentGame.letters_left.length + "\" min=\"0\" max=\"100\"></meter>";
+   if (currentGame.passcount == 1) passStr = "First Pass. Three consecutive passes and the game is a draw.";
+
+   if (currentGame.passcount == 2) passStr = "Second Pass. Three consecutive passes and the game is a draw.";
+
+   myNode.innerHTML =  "<span title=\"Number of letters left to be dealt.\">" + currentGame.letters_left.length + " <meter  id=\"letters_dealt\" value=\"" + currentGame.letters_left.length +
+                       "\" min=\"0\" max=\"100\"></meter></span><br>" + passStr;
+
+
 }
 
 function showPlayerScores ()
@@ -546,7 +813,25 @@ function showPlayerScores ()
    } else temp = "";
 
    myNode = document.getElementById("player_two_score");
+
    myNode.innerHTML = temp + currentGame.p2_score + "&nbsp;&nbsp;" + currentGame.p2_username ;
+
+   myNode = document.getElementById("winner_loser_div");
+
+   switch(currentGame.winner) {
+      case 1:
+                myNode.innerHTML = "GAME OVER " + currentGame.p1_username  + " is the WINNER";
+                break;
+      case 2:
+                myNode.innerHTML = "GAME OVER " + currentGame.p2_username  + " is the WINNER";
+                break;
+      case 3:
+                myNode.innerHTML = "GAME OVER. Its a DRAW";
+                break;
+      default:
+                myNode.innerHTML = "";
+   }
+
 }
 
 function clearWordQueryResponse ()
@@ -601,6 +886,7 @@ function moveExchange ()
       let tempHand  = "";
       let forTheBag = ""; // the letters to be returned to the bag
 
+
       for (let i = 0; i < 9; i++)  {
          if ((myExchange [i] == " ") && (myRack [i] != " ")) tempHand += myRack [i];
          if  (myExchange [i] != " ") forTheBag += myRack [i];
@@ -615,8 +901,13 @@ function moveExchange ()
          currentGame.players_turn_id = currentGame.p1_iD;
       }
 
-      currentGame.current_round++;
+      consoleOutLetterCount ("MoveExchange");
+
       currentGame.letters_left += forTheBag ;
+
+      appendToPlayLog ("exch",(7 - tempHand.length));
+
+      currentGame.current_round++;
 
       stompClient.send("/app/moveexchange", {},
            JSON.stringify({'game_id'         : currentGameID,
@@ -626,6 +917,7 @@ function moveExchange ()
                            'p2_hand'         : currentGame.p2_hand,
                            'letters_left'    : currentGame.letters_left,
                            'players_turn_id' : currentGame.players_turn_id,
+                           'playlog'         : currentGame.playlog,
                            'txName'          : termID}
        ));
 
@@ -635,6 +927,39 @@ function moveExchange ()
 
    }
 }
+
+function moveResign ()
+{
+    clearWordQueryResponse ();
+
+    let   tempReply = prompt ("RESIGN!!! Are you really sure? What would your mother think? type Y to confirm.", "NO");
+
+    if ((tempReply.toUpperCase () == "Y") || (tempReply.toUpperCase () == "YES"))
+    {
+        resetRack ();
+
+        if (currentGame.players_turn_id == currentGame.p1_iD) {
+           currentGame.winner = 2;
+        }
+        else currentGame.winner = 1;
+
+        appendToPlayLog ('resg');
+
+        stompClient.send("/app/movepass", {},
+          JSON.stringify({'game_id'         : currentGameID,
+                          'user_id'         : userID,
+                          'current_round'   : currentGame.current_round,
+                          'players_turn_id' : currentGame.players_turn_id,
+                          'winner'          : currentGame.winner,
+                          'passcount'       : currentGame.passcount,
+                          'playlog'         : currentGame.playlog,
+                          'txName'          : termID}
+      ));
+
+      updatePlayersView ();
+    }
+}
+
 
 function movePass ()
 {
@@ -649,105 +974,69 @@ function movePass ()
         if (currentGame.players_turn_id == currentGame.p1_iD) { currentGame.players_turn_id = currentGame.p2_iD; }
         else { currentGame.players_turn_id = currentGame.p1_iD;  }
 
+
+        appendToPlayLog ("pass");
+
+
         currentGame.current_round = currentGame.current_round + 1;
         currentGame.passcount = currentGame.passcount + 1;
+
+        if (currentGame.passcount == 3) currentGame.winner = 3; // Three passes in a row and it is a draw.
+
+
 
         stompClient.send("/app/movepass", {},
           JSON.stringify({'game_id'         : currentGameID,
                           'user_id'         : userID,
                           'current_round'   : currentGame.current_round,
                           'players_turn_id' : currentGame.players_turn_id,
+                          'winner'          : currentGame.winner,
                           'passcount'       : currentGame.passcount,
+                          'playlog'         : currentGame.playlog,
                           'txName'          : termID}
       ));
 
       updatePlayersView ();
     }
  }
-/*
-function movePlay ()
-{
-   let result = checkPlay ();
-
-   if (result == true) {
-
-      if (userID == currentGame.p1_iD) { currentGame.GameBoard.playMove (1); } else currentGame.GameBoard.playMove (2);
-      if (currentGame.players_turn_id == currentGame.p1_iD) {
-         currentGame.players_turn_id = p2_iD;
-         currentGame.p1_hand = myRack.replace(/\s+/g, '');
-      }
-      else {
-         currentGame.players_turn_id = p1_iD;
-         currentGame.p2_hand = myRack.replace(/\s+/g, '');
-      }
-   }
-
-   updatePlayersView
-}
-
-function sendmovePlay() {
-    //connect ();
-
-    stompClient.send("/app/moveplay", {},
-                     JSON.stringify({'game_id'        : gameID,
-                                     'lastplay'       : currentGame.GameBoard.getLastPlay (),
-                                     'challengecount' : currentGame.challengecount,
-                                     'players_turn_id': currentGame.players_turn_id,
-                                     'txName':termID}
-                         ));
-}
-*/
 
 function hideChallengeButtons ()
 {
-   let myNode = document.getElementById("challenge_btn_div");
-   if (myNode !== null) myNode.setAttribute ("class", "hide_challenge_btn_div");
-
-//   myNode = document.getElementById("accept_btn");
-//   if (myNode !== null) ("class", "hide_challenge_btn");
+   $("#challenge_btn_div :button").attr("disabled", true); // wow so this is JQuery
 }
+
 
 function showChallengeButtons ()
 {
-   let myNode = document.getElementById("challenge_btn_div");
-//   if (myNode !== null) myNode.setAttribute ("class", "hide_challenge_btn_div");
-    if (myNode !== null)
-    {
-       disableActionButtons ()
-    }
-    myNode.setAttribute ("class", "btn btn-default");
-
-//   myNode = document.getElementById("accept_btn");
-//   if (myNode !== null) myNode.setAttribute ("class", "btn btn-default");
+   $("#challenge_btn_div :button").attr("disabled", false); // wow so this is JQuery
+   disableActionButtons ();
 }
 
 function showChallengeDiv (words) {
+
    let myNode = document.getElementById("challenge_div");
    myNode.setAttribute ("class", "show_challenge_div");
-
-   myNode = document.getElementById("challenge_text");
-
-   if (currentGame.players_turn_id == userID) {
-      if (currentGame.challengecount == 0) {
-         myNode.innerHTML = "First Challenge";
-      } else {
-         myNode.innerHTML = "Second Challenge!!!!";
-      }
-   }
 
    myNode = document.getElementById("score_tbody");
    myNode.innerHTML = words;
 
-   if (currentGame.players_turn_id == userID) {
+   myNode = document.getElementById("challenge_text");
+   if (currentGame.challengecount == 0) {
+       myNode.innerHTML = "<span class=\"first_chall\">&nbsp;First Challenge</span>";
+   } else myNode.innerHTML = "<span class=\"second_chall\">&nbsp;SECOND CHALLENGE</span>";
 
+   if (currentGame.players_turn_id == userID) {
       showChallengeButtons ();
    }
-   else hideChallengeButtons ();
+   else {
+      hideChallengeButtons ();
+   }
 }
 
 function hideChallengeDiv () {
    let myNode = document.getElementById("challenge_div");
    myNode.setAttribute ("class", "hide_challenge_div");
+
 }
 
 function sendwordQuery(wordList) {
@@ -783,7 +1072,7 @@ function displayNoJoinableGames ()
 {
    let myNode = document.getElementById("left-joinable");
 
-   myNode.innerHTML = "<h2>No Joinable Games</h2>";
+   myNode.innerHTML = "<span class=\"nogames\">No Joinable Games</span>";
 }
 
 function displayJoinableGames (objArr,count)
@@ -797,17 +1086,22 @@ function displayJoinableGames (objArr,count)
         let row = objArr[ii];
         console.log (row);
         if (row['game_id'] > 0) {
-           subhtml += "<tr><td><button onclick =\"sendJoinGame (" + row['game_id'] + ")\" id=\"sendJoinGame\" class=\"btn btn-default\" >Join Game " + row['game_id'] + "</button></td></tr>";
+           subhtml += "<tr><td>" + row['game_id'] + "</td>";
+           subhtml += "<td>" + row['opponent_name'] + "</td>";
+           subhtml += "<td><button onclick =\"sendJoinGame (" + row['game_id'] + ")\" id=\"sendJoinGame\" class=\"btn btn-default\" >Join</button></td></tr>";
         }
     }
 
-    myNode.innerHTML = "<h2>Available Games To Join</h2><table>" + subhtml + "</table>";
+    myNode.innerHTML = "<table><tr><th>Game</th><th>Opponent</th><td></th></tr>" + subhtml + "</table>";
 }
 
 function movePlay  ()
 {
+    consoleOutLetterCount ("moveplay-begin");
+
     clearWordQueryResponse ();
 
+    consoleOutLetterCount ("moveplay-begin");
 
     // The currentGame  object contains
     // game_id  p1_iD p2_iD p1_username p2_username p1_score p2_score letters_left current_round p1_hand p2_hand winner board players_turn_id
@@ -818,6 +1112,8 @@ function movePlay  ()
     }
     else
     {
+       consoleOutLetterCount ("moveplay-2");
+
         if (checkPlay () == false) {
             alert ("That move does not look good. You need to fix it!!!!");
         }
@@ -828,15 +1124,23 @@ function movePlay  ()
                //currentGame.p1_hand = "";
                //for (let i = 0; i < 9; i++ ) if (myRack [i] != " ") currentGame.p1_hand += myRack [i] ;
                currentGame.p1_hand = myRack
+               consoleOutLetterCount ("moveplay-3");
             }
             else {
                currentGame.players_turn_id = currentGame.p1_iD;
                //currentGame.p2_hand = "";
                //for (let i = 0; i < 9; i++ ) if (myRack [i] != " ") currentGame.p2_hand += myRack [i] ;
                currentGame.p2_hand = myRack
+               consoleOutLetterCount ("moveplay-4");
             }
 
+            consoleOutLetterCount ("moveplay-5");
+
             tempLastPlay = currentGame.GameBoard.playRetractableLetters ();
+
+            let offset = tempLastPlay.search(/\S/);
+
+            appendToPlayLog ("play",tempLastPlay.replaceAll (" ", ''), offset);
 
             stompClient.send("/app/moveplay", {},
                     JSON.stringify({'game_id'  : currentGameID,
@@ -846,10 +1150,13 @@ function movePlay  ()
                                     'p1_hand'  : currentGame.p1_hand,
                                     'p2_hand'  : currentGame.p2_hand,
                                     'players_turn_id' : currentGame.players_turn_id,
+                                    'playlog'  : currentGame.playlog,
                                     'lastplay' : tempLastPlay}));
 
             updatePlayersView ();
         }
+        consoleOutLetterCount ("moveplay-end");
+
     }
 }
 
@@ -861,13 +1168,24 @@ function setAndShowCurrentGame (gameId)
    }
 }
 
-function displayCurrentGames (objArr,count)
+function displayCurrentGames (objArr,count,finished = false) // only show finished or current games
 {
     let myNode = document.getElementById("left-current-games");
 
+    if (finished == true) myNode = document.getElementById("left-old-games");
+
     myListOfGameIDs = [];
 
-    let currentGameshtml = "<tr><th>Game Number</th><th>Opponent</th><th>Whose Turn Is It</th><th></th></tr>";
+    let countofRowstoDisplay = 0;
+
+    let currentGameshtml = "<tr><th>Current</th><th>Opponent</th><th>Turn</th><th></th></tr>";
+
+    if (finished == true)
+    {
+       currentGameshtml = "<tr><th>Ended</th><th>Opponent</th><th><span class=\"player_name\">" + userName + "</span></th><th></th></tr>";
+    }
+
+    //currentGameshtml = "<tr><th>Current</th><th>Opponent</th><th>Turn</th><th></th></tr>";
 
     for (let ii = 0; ii < count; ii++ ) {
         let row = objArr[ii];
@@ -875,10 +1193,10 @@ function displayCurrentGames (objArr,count)
 
         if (row['p1_iD'] == userID) { tempOp = row ['p2_username']; } else { tempOp = row ['p1_username'];}
 
-        myListOfGameIDs.push (row['game_id']);
+        if (row ['winner'] == 0) myListOfGameIDs.push (row['game_id']);
 
         if (row['p2_iD'] > 0) {
-           // we have an active match
+           // we have an active match may have finished
 
            let radioButton = "<input ";
 
@@ -886,18 +1204,44 @@ function displayCurrentGames (objArr,count)
 
            radioButton += "onchange=\"radioChange (event) \" type=\"radio\" id=\"radio_id_" + row['game_id'] + "\" name=\"selectgame\" value=\"" + row['game_id'] + "\">";
 
-           if (row ['players_turn_id'] == userID)
-           {
-              // My TURN
-             currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>My Turn</td><td>" + radioButton + "</td></tr>";
+           if ((finished == false) && (row ['winner'] == 0)) {
+               if (row ['players_turn_id'] == userID)
+               {
+                  // My TURN
+                 currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>Mine</td><td>" + radioButton + "</td></tr>";
+               }
+               else {  currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>Theirs</td><td>" + radioButton + "</td></tr>"; }
+               countofRowstoDisplay++;
+
            }
-           else {  currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>Their Turn</td><td>" + radioButton + "</td></tr>"; }
+           else if ((finished == true) && (row ['winner'] >= 1))
+           {
+              currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>" + tempOp + "</td><td>";
+
+              if ( row ['winner'] == 3) { currentGameshtml += "Draw"; }
+              {
+                  if (userID == row ['p1_iD'] ) {
+                      if ( row ['winner'] == 1)  { currentGameshtml += "Won"; } else  if ( row ['winner'] == 2)  { currentGameshtml += "Lost"; }
+                  }
+                  else  if ( row ['winner'] == 2)  { currentGameshtml += "Won"; } else  if ( row ['winner'] == 1)  { currentGameshtml += "Lost"; }
+              }
+
+              currentGameshtml += "</td><td>" + radioButton + "</td></tr>";
+              countofRowstoDisplay++;
+           }
         }
-        else { currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>Waiting for an Opponent</td></tr>";
+        else if (finished == false) {
+            countofRowstoDisplay++;
+            currentGameshtml += "<tr><td>" + row['game_id'] + "</td><td>waiting</td></tr>";
         }
     }
 
-    myNode.innerHTML = "<h2>Current Games</h2><table>" + currentGameshtml + "</table>";
+    if (countofRowstoDisplay == 0) {
+        if (finished == false) { myNode.innerHTML = "<span class=\"nogames\">No Current Games</span>"; }
+        else { myNode.innerHTML = "<span class=\"nogames\">No Games Finished</span>";
+}
+    }
+    else myNode.innerHTML = "<table>" + currentGameshtml + "</table>";
 }
 
 
@@ -912,8 +1256,9 @@ function displayUserStatus () {
     if (userName != "")
     {
         const myNode = document.getElementById("left-login-status");
-        myNode.innerHTML = "<table><tr class=\"player_signed_in\"><td>Player: </td><td class=\"player_name\">" + userName + "</td><td>&nbsp;&nbsp;" +
-                           "<button onclick =\"logoutUser ( )\" id=\"logoutUser\" class=\"btn btn-default\" >Logout</button>" +
+        myNode.innerHTML = "<table><tr class=\"player_signed_in\"><td></td><td class=\"player_name\">" + userName + "&nbsp;&nbsp;</td>"
+                        + "<td><button onclick =\"sendCreateGame ()\" id=\"creategame\" class=\"btn btn-default\" >New</button></td>"
+                        + "<td><button onclick =\"logoutUser ( )\" id=\"logoutUser\" class=\"btn btn-default\" >Logout</button></td>" +
                            "</td><td><button onclick =\" displayUserStatus ( )\" id=\"displayUserStatus\" class=\"btn btn-default\" >Refresh</button></td></tr></table>";
         requestStatus();
     }
@@ -930,8 +1275,8 @@ function logoutUser ()
 function radioChange (ev) {
    let target_ev = ev.target.id;
    currentGameID = ev.target.value;
+   clearWordQueryResponse ();
    requestGameInfo (currentGameID);
-
 }
 
 function resetElementByID(theID) {

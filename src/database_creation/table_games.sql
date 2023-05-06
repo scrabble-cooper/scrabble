@@ -1,15 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
-      user_id bigint NOT NULL DEFAULT nextval('users_seq'),
-      user_name varchar(50) NOT NULL UNIQUE,
-      password varchar(50) NOT NULL,
-      total_games int NOT NULL DEFAULT 0,
-      total_win int NOT NULL DEFAULT 0,
-      total_loss int NOT NULL DEFAULT 0,
-      total_ties int NOT NULL DEFAULT 0,
-      PRIMARY KEY (user_id) --forces user_id to be unique
-);
-
-
+CREATE SEQUENCE game_seq start with 1; -- then next value will be 1
 
 CREATE TABLE IF NOT EXISTS games (
     game_id bigint NOT NULL DEFAULT nextval('game_seq'),
@@ -18,7 +7,7 @@ CREATE TABLE IF NOT EXISTS games (
 	p1_username varchar DEFAULT '', -- when a user creates a game add user_name as well as user id otherwise future selects will need to access both games and users tables to get the name
 	p2_username  varchar DEFAULT '', -- when a user joins  a game add user_name as well as user id otherwise future selects will need to access both games and users tables to get the name
     players_turn_id bigint DEFAULT NULL, -- whos turn is it. Always the players id ie p1_id or p2_id
-    passcount int NOT NULL DEFAULT 0, -- game ends in a draw if there are three passes in a row
+    passcount int NOT NULL DEFAULT 0, -- game ends in a draw if there are three passess in a row
     start_ts timestamp DEFAULT NOW (),
     last_update_ts timestamp DEFAULT NOW(),
 	p1_score int NOT NULL DEFAULT 0,
@@ -30,7 +19,8 @@ CREATE TABLE IF NOT EXISTS games (
 	winner int DEFAULT 0,
 	challengecount int DEFAULT 0,
  	board    character (225) NOT NULL DEFAULT ' '::character , -- postgres will pad it with spaces to 225
- 	lastplay character (225) NOT NULL DEFAULT ' '::character , --- stores the last move played. allowing it to be removed easily if the other play challenges it
+ 	lastplay character (225) NOT NULL DEFAULT ' '::character , --- stores the letters of the last move played. this allows it to be removed easily
+ 	                                                           --- if the other play challenges it successfully
  	playedby character (225) NOT NULL DEFAULT ' '::character , --- stores which player p_1 or p_2 played the letter 1 or 2
     playLog  varchar                  DEFAULT ''::character,   --- this is a json log of the whole game play by play
 
@@ -44,37 +34,3 @@ CREATE TABLE IF NOT EXISTS games (
 );
 
 
-
-
-
-CREATE TABLE IF NOT EXISTS words (
-        definition text DEFAULT ''::text NOT NULL,
-        length integer DEFAULT 0 NOT NULL,
-        numofa integer DEFAULT 0,
-        numofb integer DEFAULT 0,
-        numofc integer DEFAULT 0,
-        numofd integer DEFAULT 0,
-        numofe integer DEFAULT 0,
-        numoff integer DEFAULT 0,
-        numofg integer DEFAULT 0,
-        numofh integer DEFAULT 0,
-        numofi integer DEFAULT 0,
-        numofj integer DEFAULT 0,
-        numofk integer DEFAULT 0,
-        numofl integer DEFAULT 0,
-        numofm integer DEFAULT 0,
-        numofn integer DEFAULT 0,
-        numofo integer DEFAULT 0,
-        numofp integer DEFAULT 0,
-        numofq integer DEFAULT 0,
-        numofr integer DEFAULT 0,
-        numofs integer DEFAULT 0,
-        numoft integer DEFAULT 0,
-        numofu integer DEFAULT 0,
-        numofv integer DEFAULT 0,
-        numofw integer DEFAULT 0,
-        numofx integer DEFAULT 0,
-        numofy integer DEFAULT 0,
-        numofz integer DEFAULT 0,
-        word text NOT NULL
-);
