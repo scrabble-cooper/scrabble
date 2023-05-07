@@ -10,7 +10,7 @@ may need CREATE DATABASE "scrabble" WITH OWNER "postgres" ENCODING 'UTF8' LC_COL
 
 The database exists now in a terminal window
 
-cd to <db_Files>
+cd to <db_Files> // 127.0.0.1 works below because by default postgres is listenning on all addresses ie 0.0.0.0 
 
 psql -h 127.0.0.1 -d scrabble -U postgres < table_users.sql 
 
