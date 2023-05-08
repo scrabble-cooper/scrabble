@@ -16,7 +16,6 @@ services:
 
     restart: always
   app:
-#    image: words:latest
     build: .
     expose:
       - "8080:8080"
