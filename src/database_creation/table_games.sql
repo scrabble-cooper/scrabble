@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS games (
  	lastplay character (225) NOT NULL DEFAULT ' '::character , --- stores the letters of the last move played. this allows it to be removed easily
  	                                                           --- if the other play challenges it successfully
  	playedby character (225) NOT NULL DEFAULT ' '::character , --- stores which player p_1 or p_2 played the letter 1 or 2
-    playLog  varchar                  DEFAULT ''::character,   --- this is a json log of the whole game play by play
+    playlog  varchar                  DEFAULT ''::character,   --- this is a json log of the whole game play by play
 
 	PRIMARY KEY (game_id),
 	FOREIGN KEY (p1_id) REFERENCES users(user_id) ON DELETE CASCADE,
