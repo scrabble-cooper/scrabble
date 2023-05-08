@@ -6,7 +6,7 @@
    version="1.1"
    id="svg2216"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="z.svg"
+   sodipodi:docname="Z.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +25,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
      inkscape:cx="340.42141"
-     inkscape:cy="135.86552"
+     inkscape:cy="136.87567"
      inkscape:document-units="px"
      inkscape:current-layer="svg2216"
      showgrid="false"
@@ -52,6 +52,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -96,15 +97,5 @@
          style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Semi-Bold';letter-spacing:-6.9px;stroke-width:0.893309"
          d="m 169.11,308.49302 q 0,12.71883 -4.10608,18.89464 -4.0727,6.17581 -12.48515,6.17581 -8.14539,0 -12.35162,-6.37611 -4.20622,-6.3761 -4.20622,-18.69434 0,-12.91912 4.07269,-19.02817 4.10608,-6.14242 12.48515,-6.14242 8.17877,0 12.385,6.40949 4.20623,6.40948 4.20623,18.7611 z m -25.20398,0 q 0,9.98144 2.03635,14.25444 2.06973,4.27299 6.5764,4.27299 4.50667,0 6.5764,-4.33976 2.10311,-4.33976 2.10311,-14.18767 0,-9.81453 -2.10311,-14.18767 -2.06973,-4.40652 -6.5764,-4.40652 -4.50667,0 -6.5764,4.30637 -2.03635,4.30638 -2.03635,14.28782 z" />
     </g>
-    <rect
-       style="fill:#eeddbb;fill-opacity:1"
-       id="rect2949"
-       width="76.770424"
-       height="66.669083"
-       x="114.25613"
-       y="236.16261" />
   </g>
-  <g
-     transform="translate(10, 303.35287)"
-     id="g2946" />
 </svg>
