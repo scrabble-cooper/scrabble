@@ -1,0 +1,15 @@
+FROM postgres:alpine
+
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD password
+ENV POSTGRES_DB scrabble
+
+
+
+ # Copy the SQL files to the container
+ # COPY src/database_creation/init.sql /docker-entrypoint-initdb.d/0_init.sql
+COPY table_users.sql /docker-entrypoint-initdb.d/0_table_users.sql
+COPY table_games.sql /docker-entrypoint-initdb.d/1_table_games.sql
+COPY table_words.sql /docker-entrypoint-initdb.d/2_table_words.sql
+COPY word_data.sql   /docker-entrypoint-initdb.d/3_word_table.sql
+
