@@ -17,6 +17,15 @@ public class MainApp {
 
  	public static void main(String[] args) {
 
+		try
+		{
+			Thread.sleep(20000); // sleep for n milliseconds  let db initialize first
+		}
+		catch(InterruptedException ex)
+		{
+			Thread.currentThread().interrupt();
+		}
+
 		try {
 			dbconnection = dcm.getConnection();
 		}
