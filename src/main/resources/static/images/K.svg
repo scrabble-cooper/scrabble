@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="305.35287"
    height="315.35287"
    viewBox="0 0 305.35286 315.3529"
    version="1.1"
    id="svg2216"
-   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
-   sodipodi:docname="k.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:dc="http://purl.org/dc/elements/1.1/">
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="scrabble-tile-letter-k-eeddbb.svg">
   <defs
      id="defs2210" />
   <sodipodi:namedview
@@ -24,16 +24,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.9899495"
-     inkscape:cx="338.4011"
-     inkscape:cy="245.97214"
+     inkscape:cx="338.46325"
+     inkscape:cy="245.9621"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
-     inkscape:window-width="1920"
-     inkscape:window-height="1026"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-width="1366"
+     inkscape:window-height="705"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1"
      fit-margin-top="10"
      fit-margin-left="10"
@@ -41,9 +41,7 @@
      fit-margin-right="10"
      inkscape:showpageshadow="false"
      inkscape:document-rotation="0"
-     lock-margins="false"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1" />
+     lock-margins="false" />
   <metadata
      id="metadata2213">
     <rdf:RDF>
@@ -52,6 +50,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -91,12 +90,5 @@
          style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:'Open Sans';-inkscape-font-specification:'Open Sans Semi-Bold';stroke-width:0.893309"
          d="m 149.08028,302.41736 q 7.37759,0 11.68397,3.90578 4.30637,3.90579 4.30637,10.6491 0,7.81156 -4.90726,12.21809 -4.87389,4.37314 -13.88723,4.37314 -8.17877,0 -12.85236,-2.63724 v -7.11053 q 2.704,1.53561 6.20919,2.37018 3.50519,0.83457 6.50964,0.83457 5.30786,0 8.07863,-2.37018 2.77076,-2.37017 2.77076,-6.94361 0,-8.74628 -11.14983,-8.74628 -1.56899,0 -3.8724,0.33383 -2.30341,0.30044 -4.03932,0.70104 l -3.50519,-2.06973 1.86944,-23.83529 h 25.37089 v 6.977 h -18.46066 l -1.10163,12.08455 q 1.16839,-0.20029 2.83753,-0.46736 1.70252,-0.26706 4.13946,-0.26706 z" />
     </g>
-    <rect
-       style="fill:#eeddbb;fill-opacity:1"
-       id="rect1587"
-       width="55.557587"
-       height="65.658867"
-       x="120.31692"
-       y="235.15419" />
   </g>
 </svg>
