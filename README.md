@@ -3,6 +3,20 @@
 ![ColorsSurroundingLetters](https://github.com/scrabble-cooper/scrabble/assets/30630281/8919a07d-d7f2-4b27-9462-8d6db2c088ab)
 ![A_Finished_Game](https://github.com/scrabble-cooper/scrabble/assets/30630281/b4f2bc35-f58a-444c-a6c3-3b59539f5a1e)
 
+Instructions to Run Locally:
+
+commands:  
+docker system prune -a  
+mvn clean compile test package install  
+docker build -t app .  
+cd src/database_creation/  
+unzip word_data.sql.zip  //extracts word_data.sql within src/database_creation   
+docker build -t mydb .  
+cd ../..   
+docker-compose up
+
+open your browser at 127.0.0.1:8080
+
 
 Ethics Considerations:
 
@@ -34,6 +48,4 @@ Below is just 10 examples of how we incorporated ethical practices into our proj
 
 8.03. Improve their ability to produce accurate, informative, and well-written documentation.
   Documentation for this project was well recorded, as the process of building and implementing the project was noted upon each iteration of the project.
-
-
 
